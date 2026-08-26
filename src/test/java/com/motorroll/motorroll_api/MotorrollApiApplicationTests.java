@@ -1,10 +1,10 @@
-package com.dynomarket.dynomarket_api;
+package com.motorroll.motorroll_api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class DynomarketApiApplicationTests {
+class MotorrollApiApplicationTests {
 
 	@Test
 	void contextLoads() {

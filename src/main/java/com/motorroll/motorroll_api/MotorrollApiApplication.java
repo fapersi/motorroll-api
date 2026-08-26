@@ -1,13 +1,13 @@
-package com.dynomarket.dynomarket_api;
+package com.motorroll.motorroll_api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class DynomarketApiApplication {
+public class MotorrollApiApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(DynomarketApiApplication.class, args);
+		SpringApplication.run(MotorrollApiApplication.class, args);
 	}
 
 }
