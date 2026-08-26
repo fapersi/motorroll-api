@@ -1,0 +1,453 @@
+{
+  "info": {
+    "name": "DynoMarket / Motorroll API - Entrega 1",
+    "description": "Coleccion completa de la API REST del e-commerce de bancos de potencia.\n\nOrden sugerido:\n1. Auth > Login comprador (guarda el token solo)\n2. Productos > Listar catalogo\n3. Carrito > Agregar item y Checkout\n\nLos requests de login guardan el token en las variables de la coleccion, asi el resto sale sin copiar nada a mano.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "token", "value": "" },
+    { "key": "tokenVendedor", "value": "" },
+    { "key": "tokenAdmin", "value": "" },
+    { "key": "productoId", "value": "1" },
+    { "key": "itemId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Registro comprador",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/registro", "host": ["{{baseUrl}}"], "path": ["api", "auth", "registro"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"escuderia.tc\",\n  \"email\": \"boxes@escuderiatc.com.ar\",\n  \"password\": \"secreto123\",\n  \"nombre\": \"Lucas\",\n  \"apellido\": \"Ferreyra\",\n  \"rol\": \"COMPRADOR\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Registro vendedor",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/registro", "host": ["{{baseUrl}}"], "path": ["api", "auth", "registro"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"dinosur\",\n  \"email\": \"ventas@dinosur.com.ar\",\n  \"password\": \"secreto123\",\n  \"nombre\": \"Dino\",\n  \"apellido\": \"Sur\",\n  \"rol\": \"VENDEDOR\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login comprador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "pm.collectionVariables.set('token', data.token);",
+                  "pm.test('login ok', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"taller.vtv\",\n  \"password\": \"comprador1234\"\n}" }
+          }
+        },
+        {
+          "name": "Login vendedor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "pm.collectionVariables.set('tokenVendedor', data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"motorroll\",\n  \"password\": \"vendedor1234\"\n}" }
+          }
+        },
+        {
+          "name": "Login admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "pm.collectionVariables.set('tokenAdmin', data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin1234\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Productos",
+      "item": [
+        {
+          "name": "Listar catalogo",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/productos", "host": ["{{baseUrl}}"], "path": ["api", "productos"] }
+          }
+        },
+        {
+          "name": "Buscar y filtrar",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/productos?texto=inercial&categoriaId=1&precioMin=1000&precioMax=90000&soloConStock=true&ordenarPor=precio_asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "productos"],
+              "query": [
+                { "key": "texto", "value": "inercial" },
+                { "key": "categoriaId", "value": "1" },
+                { "key": "marca", "value": "Motorroll", "disabled": true },
+                { "key": "precioMin", "value": "1000" },
+                { "key": "precioMax", "value": "90000" },
+                { "key": "soloConStock", "value": "true" },
+                { "key": "ordenarPor", "value": "precio_asc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detalle de producto",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/productos/{{productoId}}", "host": ["{{baseUrl}}"], "path": ["api", "productos", "{{productoId}}"] }
+          }
+        },
+        {
+          "name": "Listar marcas",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/productos/marcas", "host": ["{{baseUrl}}"], "path": ["api", "productos", "marcas"] }
+          }
+        },
+        {
+          "name": "Mis publicaciones (vendedor)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenVendedor}}" }],
+            "url": { "raw": "{{baseUrl}}/api/productos/mis-publicaciones", "host": ["{{baseUrl}}"], "path": ["api", "productos", "mis-publicaciones"] }
+          }
+        },
+        {
+          "name": "Publicar producto (vendedor)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenVendedor}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/productos", "host": ["{{baseUrl}}"], "path": ["api", "productos"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Banco inercial MR-1500 doble rodillo\",\n  \"descripcion\": \"Banco inercial de doble rodillo para vehiculos de traccion integral, con correccion atmosferica.\",\n  \"precio\": 72900.00,\n  \"stock\": 2,\n  \"marca\": \"Motorroll\",\n  \"categoriaId\": 2,\n  \"descuento\": 0,\n  \"esServicio\": false,\n  \"imagenes\": [\n    { \"url\": \"https://picsum.photos/seed/mr1500a/800/600\", \"orden\": 0 },\n    { \"url\": \"https://picsum.photos/seed/mr1500b/800/600\", \"orden\": 1 }\n  ],\n  \"fichaTecnica\": {\n    \"potenciaMaximaHp\": 1500,\n    \"velocidadMaximaKmh\": 280,\n    \"tipoTraccion\": \"Integral 4x4\",\n    \"diametroRodilloMm\": 450,\n    \"pesoKg\": 2400.00,\n    \"requerimientosSala\": \"Foso de 5 x 3 m con toma trifasica\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Editar producto (vendedor)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenVendedor}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/productos/{{productoId}}", "host": ["{{baseUrl}}"], "path": ["api", "productos", "{{productoId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Banco de potencia inercial MR-1200\",\n  \"descripcion\": \"Descripcion actualizada del equipo.\",\n  \"precio\": 49900.00,\n  \"stock\": 3,\n  \"marca\": \"Motorroll\",\n  \"categoriaId\": 2\n}"
+            }
+          }
+        },
+        {
+          "name": "Actualizar stock (vendedor)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenVendedor}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/productos/{{productoId}}/stock", "host": ["{{baseUrl}}"], "path": ["api", "productos", "{{productoId}}", "stock"] },
+            "body": { "mode": "raw", "raw": "{\n  \"stock\": 5\n}" }
+          }
+        },
+        {
+          "name": "Aplicar descuento (vendedor)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenVendedor}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/productos/{{productoId}}/descuento", "host": ["{{baseUrl}}"], "path": ["api", "productos", "{{productoId}}", "descuento"] },
+            "body": { "mode": "raw", "raw": "{\n  \"descuento\": 20\n}" }
+          }
+        },
+        {
+          "name": "Dar de baja publicacion (vendedor)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenVendedor}}" }],
+            "url": { "raw": "{{baseUrl}}/api/productos/{{productoId}}", "host": ["{{baseUrl}}"], "path": ["api", "productos", "{{productoId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categorias",
+      "item": [
+        {
+          "name": "Listar categorias",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/categorias", "host": ["{{baseUrl}}"], "path": ["api", "categorias"] }
+          }
+        },
+        {
+          "name": "Detalle de categoria",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/categorias/1", "host": ["{{baseUrl}}"], "path": ["api", "categorias", "1"] }
+          }
+        },
+        {
+          "name": "Crear categoria (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenAdmin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/categorias", "host": ["{{baseUrl}}"], "path": ["api", "categorias"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Bancos didacticos\",\n  \"descripcion\": \"Bancos para laboratorios de motores de institutos y universidades\",\n  \"categoriaPadreId\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Editar categoria (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenAdmin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/categorias/11", "host": ["{{baseUrl}}"], "path": ["api", "categorias", "11"] },
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Bancos didacticos\",\n  \"descripcion\": \"Descripcion actualizada\"\n}" }
+          }
+        },
+        {
+          "name": "Eliminar categoria (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenAdmin}}" }],
+            "url": { "raw": "{{baseUrl}}/api/categorias/11", "host": ["{{baseUrl}}"], "path": ["api", "categorias", "11"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Carrito",
+      "item": [
+        {
+          "name": "Ver carrito",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/carrito", "host": ["{{baseUrl}}"], "path": ["api", "carrito"] }
+          }
+        },
+        {
+          "name": "Agregar item",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.items && data.items.length) {",
+                  "  pm.collectionVariables.set('itemId', data.items[data.items.length - 1].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/carrito/items", "host": ["{{baseUrl}}"], "path": ["api", "carrito", "items"] },
+            "body": { "mode": "raw", "raw": "{\n  \"productoId\": 1,\n  \"cantidad\": 1\n}" }
+          }
+        },
+        {
+          "name": "Agregar item SIN stock (debe dar 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/carrito/items", "host": ["{{baseUrl}}"], "path": ["api", "carrito", "items"] },
+            "body": { "mode": "raw", "raw": "{\n  \"productoId\": 4,\n  \"cantidad\": 1\n}" }
+          }
+        },
+        {
+          "name": "Modificar cantidad",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/carrito/items/{{itemId}}", "host": ["{{baseUrl}}"], "path": ["api", "carrito", "items", "{{itemId}}"] },
+            "body": { "mode": "raw", "raw": "{\n  \"cantidad\": 2\n}" }
+          }
+        },
+        {
+          "name": "Eliminar item",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/carrito/items/{{itemId}}", "host": ["{{baseUrl}}"], "path": ["api", "carrito", "items", "{{itemId}}"] }
+          }
+        },
+        {
+          "name": "Vaciar carrito",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/carrito", "host": ["{{baseUrl}}"], "path": ["api", "carrito"] }
+          }
+        },
+        {
+          "name": "Checkout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/carrito/checkout", "host": ["{{baseUrl}}"], "path": ["api", "carrito", "checkout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ordenes",
+      "item": [
+        {
+          "name": "Mis ordenes",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/ordenes", "host": ["{{baseUrl}}"], "path": ["api", "ordenes"] }
+          }
+        },
+        {
+          "name": "Detalle de orden",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/ordenes/1", "host": ["{{baseUrl}}"], "path": ["api", "ordenes", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Mi perfil",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/usuarios/me", "host": ["{{baseUrl}}"], "path": ["api", "usuarios", "me"] }
+          }
+        },
+        {
+          "name": "Editar mi perfil",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/usuarios/me", "host": ["{{baseUrl}}"], "path": ["api", "usuarios", "me"] },
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Martin\",\n  \"apellido\": \"Alvarez\",\n  \"email\": \"compras@vtvcentro.com.ar\"\n}" }
+          }
+        },
+        {
+          "name": "Listar usuarios (admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenAdmin}}" }],
+            "url": { "raw": "{{baseUrl}}/api/usuarios", "host": ["{{baseUrl}}"], "path": ["api", "usuarios"] }
+          }
+        },
+        {
+          "name": "Cambiar rol (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenAdmin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/usuarios/6/rol", "host": ["{{baseUrl}}"], "path": ["api", "usuarios", "6", "rol"] },
+            "body": { "mode": "raw", "raw": "{\n  \"rol\": \"VENDEDOR\"\n}" }
+          }
+        },
+        {
+          "name": "Habilitar / deshabilitar cuenta (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenAdmin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/usuarios/5/estado", "host": ["{{baseUrl}}"], "path": ["api", "usuarios", "5", "estado"] },
+            "body": { "mode": "raw", "raw": "{\n  \"activo\": false\n}" }
+          }
+        },
+        {
+          "name": "Eliminar usuario (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenAdmin}}" }],
+            "url": { "raw": "{{baseUrl}}/api/usuarios/6", "host": ["{{baseUrl}}"], "path": ["api", "usuarios", "6"] }
+          }
+        }
+      ]
+    }
+  ]
+}
