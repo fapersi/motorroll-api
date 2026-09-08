@@ -34,3 +34,6 @@ build/
 
 ### Base de datos H2 local ###
 data/
+
+### Notas personales (contexto de la materia, no forma parte del trabajo) ###
+notas/
