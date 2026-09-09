@@ -4,22 +4,24 @@ import com.motorroll.motorroll_api.dto.common.ApiError;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Centraliza el manejo de errores: en lugar de que el framework devuelva un stacktrace,
- * la API responde siempre el mismo JSON con el status y un mensaje entendible.
- */
 @RestControllerAdvice
 public class ManejadorGlobalDeExcepciones {
-
     @ExceptionHandler(RecursoNoEncontradoException.class)
     public ResponseEntity<ApiError> manejarNoEncontrado(RecursoNoEncontradoException ex, HttpServletRequest request) {
         return armarRespuesta(HttpStatus.NOT_FOUND, ex.getMessage(), request);
@@ -45,7 +47,6 @@ public class ManejadorGlobalDeExcepciones {
         return armarRespuesta(HttpStatus.FORBIDDEN, ex.getMessage(), request);
     }
 
-    /** Errores de las anotaciones de validacion (@NotBlank, @Min, etc.) sobre los DTO de entrada. */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> manejarValidaciones(MethodArgumentNotValidException ex, HttpServletRequest request) {
         Map<String, String> errores = new LinkedHashMap<>();
@@ -62,6 +63,47 @@ public class ManejadorGlobalDeExcepciones {
                 .build();
 
         return ResponseEntity.badRequest().body(cuerpo);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiError> manejarMetodoNoSoportado(HttpRequestMethodNotSupportedException ex,
+                                                            HttpServletRequest request) {
+        String permitidos = ex.getSupportedHttpMethods() == null ? "" :
+                " Metodos permitidos: " + ex.getSupportedHttpMethods() + ".";
+
+        return armarRespuesta(HttpStatus.METHOD_NOT_ALLOWED,
+                "El metodo " + ex.getMethod() + " no esta soportado en esta ruta." + permitidos, request);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> manejarJsonIlegible(HttpMessageNotReadableException ex,
+                                                        HttpServletRequest request) {
+        return armarRespuesta(HttpStatus.BAD_REQUEST,
+                "El cuerpo de la solicitud no es un JSON valido o no tiene el formato esperado", request);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> manejarTipoInvalido(MethodArgumentTypeMismatchException ex,
+                                                        HttpServletRequest request) {
+        return armarRespuesta(HttpStatus.BAD_REQUEST,
+                "El valor '" + ex.getValue() + "' no es valido para el parametro " + ex.getName(), request);
+    }
+
+    @ExceptionHandler({HttpMediaTypeNotSupportedException.class,
+                       MissingServletRequestPartException.class,
+                       MissingServletRequestParameterException.class})
+    public ResponseEntity<ApiError> manejarRequestIncompleto(Exception ex, HttpServletRequest request) {
+        return armarRespuesta(HttpStatus.BAD_REQUEST,
+                "Falta el archivo o el formato del request no es el esperado. "
+                        + "Para subir una foto hay que enviarla como multipart/form-data en el campo 'imagen'",
+                request);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiError> manejarArchivoDemasiadoGrande(MaxUploadSizeExceededException ex,
+                                                                  HttpServletRequest request) {
+        return armarRespuesta(HttpStatus.PAYLOAD_TOO_LARGE,
+                "El archivo es demasiado grande. El maximo permitido es 5 MB", request);
     }
 
     @ExceptionHandler(Exception.class)

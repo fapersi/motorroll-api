@@ -5,7 +5,6 @@ import com.motorroll.motorroll_api.dto.carrito.CarritoResponse;
 import com.motorroll.motorroll_api.dto.orden.OrdenResponse;
 
 public interface CarritoService {
-
     CarritoResponse verCarrito(String username);
 
     CarritoResponse agregarItem(String username, AgregarItemRequest request);
@@ -16,6 +15,5 @@ public interface CarritoService {
 
     CarritoResponse vaciar(String username);
 
-    /** Confirma la compra: revalida el stock de cada item, lo descuenta y genera la orden. */
     OrdenResponse checkout(String username);
 }

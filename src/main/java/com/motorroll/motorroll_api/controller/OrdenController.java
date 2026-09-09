@@ -12,12 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/** Historial de compras del usuario logueado. */
 @RestController
 @RequestMapping("/api/ordenes")
 @RequiredArgsConstructor
 public class OrdenController {
-
     private final OrdenService ordenService;
 
     @GetMapping

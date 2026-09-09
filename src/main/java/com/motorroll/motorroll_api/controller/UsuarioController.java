@@ -14,15 +14,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Perfil del usuario logueado y administracion de cuentas.
- * El username sale del token, nunca de la URL: asi nadie puede tocar el perfil de otro.
- */
 @RestController
 @RequestMapping("/api/usuarios")
 @RequiredArgsConstructor
 public class UsuarioController {
-
     private final UsuarioService usuarioService;
 
     @GetMapping("/me")
@@ -36,8 +31,6 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.actualizarPerfil(authentication.getName(), request));
     }
 
-    // ---------------- Administracion de cuentas (solo ADMIN) ----------------
-
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UsuarioResponse>> listar() {
@@ -50,7 +43,6 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.obtenerPorId(id));
     }
 
-    /** Asignacion de permisos: cambia el rol de la cuenta. */
     @PutMapping("/{id}/rol")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsuarioResponse> cambiarRol(@PathVariable Long id,
@@ -58,7 +50,6 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.cambiarRol(id, request.getRol()));
     }
 
-    /** Habilita o deshabilita la cuenta sin borrarla. */
     @PutMapping("/{id}/estado")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsuarioResponse> cambiarEstado(@PathVariable Long id,

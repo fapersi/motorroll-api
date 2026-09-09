@@ -9,12 +9,10 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.util.List;
 
-/** Alta y edicion de una publicacion. La hace el usuario con rol VENDEDOR. */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductoRequest {
-
     @NotBlank(message = "El nombre del producto es obligatorio")
     @Size(max = 150, message = "El nombre no puede superar los 150 caracteres")
     private String nombre;
@@ -41,10 +39,8 @@ public class ProductoRequest {
     @Max(value = 100, message = "El descuento no puede ser mayor a 100")
     private Integer descuento;
 
-    /** true si la publicacion es un servicio (calibracion, instalacion): el stock son cupos. */
     private Boolean esServicio;
 
-    /** Una o mas fotos del producto, como pide el enunciado. */
     @Valid
     private List<ImagenRequest> imagenes;
 

@@ -13,12 +13,6 @@ import java.util.Optional;
 
 @Repository
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
-
-    /**
-     * Busqueda del catalogo con todos los filtros opcionales: cuando un parametro llega en null
-     * esa condicion no filtra nada. Si categoriaId apunta a una categoria padre, tambien
-     * devuelve los productos de sus subcategorias.
-     */
     @Query("""
             SELECT p FROM Producto p
             LEFT JOIN p.categoria c

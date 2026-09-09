@@ -1,0 +1,1748 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-09-08T00:00:00.000Z",
+  "__export_source": "motorroll-api:entrega-1",
+  "resources": [
+    {
+      "_id": "wrk_motorroll",
+      "_type": "workspace",
+      "parentId": null,
+      "name": "Motorroll API - Entrega 1",
+      "description": "TPO Aplicaciones Interactivas - UADE 2C 2026. Comision 6132.\n\nOrden de la demo:\n1. Auth > Login (comprador / vendedor / admin)\n2. Productos > catalogo y filtros\n3. Carrito > agregar + checkout\n4. Ordenes > historial\n\nEl token se toma solo desde el request de login (Insomnia lo encadena). Si algo falla, pegar el token a mano en el Environment.",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_base",
+      "_type": "environment",
+      "parentId": "wrk_motorroll",
+      "name": "Local",
+      "data": {
+        "baseUrl": "http://localhost:8080",
+        "token": "",
+        "tokenVendedor": "",
+        "tokenAdmin": ""
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "baseUrl",
+          "token",
+          "tokenVendedor",
+          "tokenAdmin"
+        ]
+      },
+      "metaSortKey": 1,
+      "isPrivate": false
+    },
+    {
+      "_id": "fld_auth",
+      "_type": "request_group",
+      "parentId": "wrk_motorroll",
+      "name": "1. Auth",
+      "description": "Registro y login. Aca se generan los tokens que usa el resto.",
+      "metaSortKey": 100,
+      "environment": {},
+      "authentication": {}
+    },
+    {
+      "_id": "req_registro_comprador",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Registro COMPRADOR",
+      "description": "201. La password se guarda hasheada con BCrypt, nunca en texto plano.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/auth/registro",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 200,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"escuderia.tc\",\n  \"email\": \"boxes@escuderiatc.com.ar\",\n  \"password\": \"secreto123\",\n  \"nombre\": \"Lucas\",\n  \"apellido\": \"Ferreyra\",\n  \"rol\": \"COMPRADOR\"\n}"
+      }
+    },
+    {
+      "_id": "req_registro_vendedor",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Registro VENDEDOR",
+      "description": "201.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/auth/registro",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 300,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"dinosur\",\n  \"email\": \"ventas@dinosur.com.ar\",\n  \"password\": \"secreto123\",\n  \"nombre\": \"Dino\",\n  \"apellido\": \"Sur\",\n  \"rol\": \"VENDEDOR\"\n}"
+      }
+    },
+    {
+      "_id": "req_registro_duplicado",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Registro con username repetido -> 409",
+      "description": "409 Conflict. RecursoDuplicadoException.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/auth/registro",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 400,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"admin\",\n  \"email\": \"otro@mail.com\",\n  \"password\": \"secreto123\",\n  \"nombre\": \"X\",\n  \"apellido\": \"Y\",\n  \"rol\": \"COMPRADOR\"\n}"
+      }
+    },
+    {
+      "_id": "req_login_comprador",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Login COMPRADOR (genera {{token}})",
+      "description": "200 con el JWT. Este request alimenta la variable token del Environment.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/auth/login",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 500,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"taller.vtv\",\n  \"password\": \"comprador1234\"\n}"
+      },
+      "afterResponseScript": "// Guarda el token de este login en el environment, para que lo usen los demas requests.\nconst cuerpo = insomnia.response.json();\ninsomnia.environment.set(\"token\", cuerpo.token);\nconsole.log(\"Token guardado en token\");",
+      "preRequestScript": ""
+    },
+    {
+      "_id": "req_login_vendedor",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Login VENDEDOR (genera {{tokenVendedor}})",
+      "description": "200 con el JWT del vendedor.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/auth/login",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 600,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"motorroll\",\n  \"password\": \"vendedor1234\"\n}"
+      },
+      "afterResponseScript": "// Guarda el token de este login en el environment, para que lo usen los demas requests.\nconst cuerpo = insomnia.response.json();\ninsomnia.environment.set(\"tokenVendedor\", cuerpo.token);\nconsole.log(\"Token guardado en tokenVendedor\");",
+      "preRequestScript": ""
+    },
+    {
+      "_id": "req_login_admin",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Login ADMIN (genera {{tokenAdmin}})",
+      "description": "200 con el JWT del admin.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/auth/login",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 700,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"admin\",\n  \"password\": \"admin1234\"\n}"
+      },
+      "afterResponseScript": "// Guarda el token de este login en el environment, para que lo usen los demas requests.\nconst cuerpo = insomnia.response.json();\ninsomnia.environment.set(\"tokenAdmin\", cuerpo.token);\nconsole.log(\"Token guardado en tokenAdmin\");",
+      "preRequestScript": ""
+    },
+    {
+      "_id": "req_login_mal",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Login con password incorrecta -> 401",
+      "description": "401. CredencialesInvalidasException. No dice si fallo el usuario o la password.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/auth/login",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 800,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"admin\",\n  \"password\": \"malamala\"\n}"
+      }
+    },
+    {
+      "_id": "fld_prod",
+      "_type": "request_group",
+      "parentId": "wrk_motorroll",
+      "name": "2. Productos (catalogo publico)",
+      "description": "GET sin token. Es el catalogo que va a consumir el front.",
+      "metaSortKey": 900,
+      "environment": {},
+      "authentication": {}
+    },
+    {
+      "_id": "req_catalogo",
+      "_type": "request",
+      "parentId": "fld_prod",
+      "name": "Listar catalogo (sin token)",
+      "description": "200 con 12 productos. Publico: no hace falta token.",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/productos",
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 1000,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_cat_padre",
+      "_type": "request",
+      "parentId": "fld_prod",
+      "name": "Filtrar por categoria PADRE (trae subcategorias)",
+      "description": "categoriaId=1 (Bancos de potencia) trae tambien Inercial, Hidraulico, Mixto y Motos.",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/productos?categoriaId=1",
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 1100,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_filtros",
+      "_type": "request",
+      "parentId": "fld_prod",
+      "name": "Filtro combinado (texto + precio + stock + orden)",
+      "description": "Todos los filtros son opcionales y combinables.",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/productos?texto=banco&precioMin=1000&precioMax=90000&soloConStock=true&ordenarPor=precio_asc",
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 1200,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_marcas",
+      "_type": "request",
+      "parentId": "fld_prod",
+      "name": "Listar marcas",
+      "description": "Para armar el combo de filtro del front.",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/productos/marcas",
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 1300,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_detalle",
+      "_type": "request",
+      "parentId": "fld_prod",
+      "name": "Detalle de producto (con fotos y ficha tecnica)",
+      "description": "200 con galeria de imagenes y ficha tecnica.",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/productos/1",
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 1400,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_detalle_desc",
+      "_type": "request",
+      "parentId": "fld_prod",
+      "name": "Detalle con descuento (32900 -> 29610)",
+      "description": "DT-800 tiene 10% de descuento: mostrar precio vs precioFinal.",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/productos/2",
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 1500,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_sin_stock",
+      "_type": "request",
+      "parentId": "fld_prod",
+      "name": "Detalle producto SIN stock (hayStock=false)",
+      "description": "MR-MX3000, stock 0. El front lo muestra como no disponible.",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/productos/4",
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 1600,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "fld_vend",
+      "_type": "request_group",
+      "parentId": "wrk_motorroll",
+      "name": "3. Gestion de productos (VENDEDOR)",
+      "description": "Alta, edicion, stock, descuento y baja. Solo el vendedor duenio.",
+      "metaSortKey": 1700,
+      "environment": {},
+      "authentication": {}
+    },
+    {
+      "_id": "req_mis_pub",
+      "_type": "request",
+      "parentId": "fld_vend",
+      "name": "Mis publicaciones",
+      "description": "Incluye tambien las dadas de baja (activo=false).",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/productos/mis-publicaciones",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenVendedor }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 1800,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_crear_prod",
+      "_type": "request",
+      "parentId": "fld_vend",
+      "name": "Alta de publicacion (2 fotos + ficha tecnica)",
+      "description": "201. Anotar el id que devuelve: es el que usan los requests que siguen.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/productos",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenVendedor }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 1900,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nombre\": \"Banco inercial MR-900 demo\",\n  \"descripcion\": \"Dinamometro de rodillos inercial para autos de traccion simple, con adquisicion de RPM y curvas de potencia.\",\n  \"precio\": 72900,\n  \"stock\": 4,\n  \"marca\": \"Motorroll\",\n  \"categoriaId\": 2,\n  \"esServicio\": false,\n  \"imagenes\": [\n    {\n      \"url\": \"https://picsum.photos/seed/demo1/800/600\",\n      \"orden\": 0\n    },\n    {\n      \"url\": \"https://picsum.photos/seed/demo2/800/600\",\n      \"orden\": 1\n    }\n  ],\n  \"fichaTecnica\": {\n    \"potenciaMaximaHp\": 900,\n    \"velocidadMaximaKmh\": 220,\n    \"tipoTraccion\": \"Simple\",\n    \"diametroRodilloMm\": 350,\n    \"pesoKg\": 1200,\n    \"requerimientosSala\": \"Foso de 4 x 2 m y toma trifasica\"\n  }\n}"
+      }
+    },
+    {
+      "_id": "req_editar_prod",
+      "_type": "request",
+      "parentId": "fld_vend",
+      "name": "Editar publicacion",
+      "description": "Cambiar el 13 por el id que devolvio el alta.",
+      "method": "PUT",
+      "url": "{{ _.baseUrl }}/api/productos/13",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenVendedor }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 2000,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nombre\": \"Banco inercial MR-900 demo (editado)\",\n  \"descripcion\": \"Descripcion actualizada durante la demo de la entrega.\",\n  \"precio\": 69900,\n  \"stock\": 4,\n  \"marca\": \"Motorroll\",\n  \"categoriaId\": 2,\n  \"esServicio\": false\n}"
+      }
+    },
+    {
+      "_id": "req_patch_stock",
+      "_type": "request",
+      "parentId": "fld_vend",
+      "name": "Manejar el stock (PATCH)",
+      "description": "Requisito del enunciado: el vendedor maneja el stock de su producto.",
+      "method": "PATCH",
+      "url": "{{ _.baseUrl }}/api/productos/13/stock",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenVendedor }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 2100,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"stock\": 9\n}"
+      }
+    },
+    {
+      "_id": "req_patch_desc",
+      "_type": "request",
+      "parentId": "fld_vend",
+      "name": "Aplicar descuento 20% (PATCH)",
+      "description": "Gestion de descuentos individuales. 72900 -> 58320.",
+      "method": "PATCH",
+      "url": "{{ _.baseUrl }}/api/productos/13/descuento",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenVendedor }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 2200,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"descuento\": 20\n}"
+      }
+    },
+    {
+      "_id": "req_delete_prod",
+      "_type": "request",
+      "parentId": "fld_vend",
+      "name": "Eliminar publicacion (baja logica)",
+      "description": "204. No borra la fila: pone activo=false para no romper el historial de ordenes.",
+      "method": "DELETE",
+      "url": "{{ _.baseUrl }}/api/productos/13",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenVendedor }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 2300,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_ajeno",
+      "_type": "request",
+      "parentId": "fld_vend",
+      "name": "Tocar producto de OTRO vendedor -> 403",
+      "description": "403. Estamos logueados como motorroll y el producto 2 es de dynotech. Esto no lo resuelve Spring Security por rol: se valida en el servicio.",
+      "method": "PATCH",
+      "url": "{{ _.baseUrl }}/api/productos/2/descuento",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenVendedor }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 2400,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"descuento\": 50\n}"
+      }
+    },
+    {
+      "_id": "req_dto_invalido",
+      "_type": "request",
+      "parentId": "fld_vend",
+      "name": "DTO invalido -> 400 con detalle por campo",
+      "description": "400. Bean Validation: devuelve el mapa errores campo por campo.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/productos",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenVendedor }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 2500,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nombre\": \"\",\n  \"precio\": -5,\n  \"stock\": -1\n}"
+      }
+    },
+    {
+      "_id": "req_comprador_publica",
+      "_type": "request",
+      "parentId": "fld_vend",
+      "name": "COMPRADOR intenta publicar -> 403",
+      "description": "403. Se valida el rol en el servicio.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/productos",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 2600,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nombre\": \"No deberia poder\",\n  \"descripcion\": \"prueba de permisos\",\n  \"precio\": 100,\n  \"stock\": 1,\n  \"categoriaId\": 2\n}"
+      }
+    },
+    {
+      "_id": "fld_cat",
+      "_type": "request_group",
+      "parentId": "wrk_motorroll",
+      "name": "4. Categorias",
+      "description": "GET publico. Alta, edicion y baja solo ADMIN.",
+      "metaSortKey": 2700,
+      "environment": {},
+      "authentication": {}
+    },
+    {
+      "_id": "req_cats",
+      "_type": "request",
+      "parentId": "fld_cat",
+      "name": "Listar categorias (publico)",
+      "description": "Jerarquia padre / subcategorias.",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/categorias",
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 2800,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_cat_id",
+      "_type": "request",
+      "parentId": "fld_cat",
+      "name": "Detalle de categoria",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/categorias/1",
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 2900,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_cat_crear",
+      "_type": "request",
+      "parentId": "fld_cat",
+      "name": "Crear categoria (ADMIN)",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/categorias",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenAdmin }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 3000,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nombre\": \"Categoria demo\",\n  \"descripcion\": \"Creada en vivo durante la demo\"\n}"
+      }
+    },
+    {
+      "_id": "req_cat_editar",
+      "_type": "request",
+      "parentId": "fld_cat",
+      "name": "Editar categoria (ADMIN)",
+      "description": "Cambiar el 11 por el id que devolvio el alta.",
+      "method": "PUT",
+      "url": "{{ _.baseUrl }}/api/categorias/11",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenAdmin }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 3100,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nombre\": \"Categoria demo editada\",\n  \"descripcion\": \"Descripcion actualizada\"\n}"
+      }
+    },
+    {
+      "_id": "req_cat_dup",
+      "_type": "request",
+      "parentId": "fld_cat",
+      "name": "Crear categoria duplicada -> 409",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/categorias",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenAdmin }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 3200,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nombre\": \"Categoria demo\",\n  \"descripcion\": \"repetida\"\n}"
+      }
+    },
+    {
+      "_id": "req_cat_con_prod",
+      "_type": "request",
+      "parentId": "fld_cat",
+      "name": "Borrar categoria CON productos -> 400",
+      "description": "400. Regla de negocio: no se puede dejar productos huerfanos.",
+      "method": "DELETE",
+      "url": "{{ _.baseUrl }}/api/categorias/2",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenAdmin }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 3300,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_cat_borrar",
+      "_type": "request",
+      "parentId": "fld_cat",
+      "name": "Borrar categoria vacia (ADMIN)",
+      "description": "",
+      "method": "DELETE",
+      "url": "{{ _.baseUrl }}/api/categorias/11",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenAdmin }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 3400,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_cat_sin_rol",
+      "_type": "request",
+      "parentId": "fld_cat",
+      "name": "VENDEDOR intenta crear categoria -> 403",
+      "description": "403. Esta si la corta Spring Security por rol en el SecurityConfig.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/categorias",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenVendedor }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 3500,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nombre\": \"No deberia poder\",\n  \"descripcion\": \"prueba de permisos\"\n}"
+      }
+    },
+    {
+      "_id": "fld_carrito",
+      "_type": "request_group",
+      "parentId": "wrk_motorroll",
+      "name": "5. Carrito",
+      "description": "El corazon de la demo: agregar, validar stock y checkout.",
+      "metaSortKey": 3600,
+      "environment": {},
+      "authentication": {}
+    },
+    {
+      "_id": "req_carrito_sin_token",
+      "_type": "request",
+      "parentId": "fld_carrito",
+      "name": "Ver carrito SIN token -> 401",
+      "description": "401. Mostrar primero este para explicar que la API es stateless y pide token.",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/carrito",
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 3700,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_carrito_ver",
+      "_type": "request",
+      "parentId": "fld_carrito",
+      "name": "Ver carrito",
+      "description": "Si no existe un carrito ABIERTO, lo crea.",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/carrito",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 3800,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_carrito_add",
+      "_type": "request",
+      "parentId": "fld_carrito",
+      "name": "Agregar producto al carrito",
+      "description": "201.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/carrito/items",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 3900,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"productoId\": 1,\n  \"cantidad\": 1\n}"
+      }
+    },
+    {
+      "_id": "req_carrito_add2",
+      "_type": "request",
+      "parentId": "fld_carrito",
+      "name": "Agregar un segundo producto (con descuento)",
+      "description": "DT-800 con 10% off: sirve para mostrar el calculo del total.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/carrito/items",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 4000,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"productoId\": 2,\n  \"cantidad\": 2\n}"
+      }
+    },
+    {
+      "_id": "req_carrito_sin_stock",
+      "_type": "request",
+      "parentId": "fld_carrito",
+      "name": "Agregar producto SIN stock -> 400",
+      "description": "400. Requisito del enunciado: si no tiene stock no se puede agregar.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/carrito/items",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 4100,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"productoId\": 4,\n  \"cantidad\": 1\n}"
+      }
+    },
+    {
+      "_id": "req_carrito_exceso",
+      "_type": "request",
+      "parentId": "fld_carrito",
+      "name": "Pedir mas unidades de las disponibles -> 400",
+      "description": "400 con el detalle: 'Disponible: 3, pediste: 99'.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/carrito/items",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 4200,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"productoId\": 1,\n  \"cantidad\": 99\n}"
+      }
+    },
+    {
+      "_id": "req_carrito_cantidad",
+      "_type": "request",
+      "parentId": "fld_carrito",
+      "name": "Modificar la cantidad de un item",
+      "description": "Cambiar el 1 por el id del item que devolvio el carrito.",
+      "method": "PUT",
+      "url": "{{ _.baseUrl }}/api/carrito/items/1",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 4300,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"cantidad\": 2\n}"
+      }
+    },
+    {
+      "_id": "req_carrito_del_item",
+      "_type": "request",
+      "parentId": "fld_carrito",
+      "name": "Eliminar un item",
+      "description": "orphanRemoval=true: al sacarlo de la lista se borra de la tabla.",
+      "method": "DELETE",
+      "url": "{{ _.baseUrl }}/api/carrito/items/2",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 4400,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_carrito_vaciar",
+      "_type": "request",
+      "parentId": "fld_carrito",
+      "name": "Vaciar el carrito",
+      "description": "",
+      "method": "DELETE",
+      "url": "{{ _.baseUrl }}/api/carrito",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 4500,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_checkout",
+      "_type": "request",
+      "parentId": "fld_carrito",
+      "name": "CHECKOUT (confirmar la compra)",
+      "description": "201 con la orden. Revalida stock item por item, calcula el total, descuenta stock y cierra el carrito. Todo @Transactional.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/carrito/checkout",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 4600,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "fld_ord",
+      "_type": "request_group",
+      "parentId": "wrk_motorroll",
+      "name": "6. Ordenes",
+      "description": "Historial de compras. Los datos quedan congelados al momento de comprar.",
+      "metaSortKey": 4700,
+      "environment": {},
+      "authentication": {}
+    },
+    {
+      "_id": "req_ordenes",
+      "_type": "request",
+      "parentId": "fld_ord",
+      "name": "Mis ordenes",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/ordenes",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 4800,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_orden_id",
+      "_type": "request",
+      "parentId": "fld_ord",
+      "name": "Detalle de una orden",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/ordenes/1",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 4900,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_stock_post",
+      "_type": "request",
+      "parentId": "fld_ord",
+      "name": "Verificar stock descontado post-checkout",
+      "description": "Comparar el stock con el que tenia antes del checkout.",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/productos/1",
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 5000,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "fld_user",
+      "_type": "request_group",
+      "parentId": "wrk_motorroll",
+      "name": "7. Usuarios y roles",
+      "description": "Perfil propio y administracion de cuentas (ADMIN).",
+      "metaSortKey": 5100,
+      "environment": {},
+      "authentication": {}
+    },
+    {
+      "_id": "req_me",
+      "_type": "request",
+      "parentId": "fld_user",
+      "name": "Mi perfil",
+      "description": "Nunca devuelve el hash de la password: el DTO no tiene ese campo.",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/usuarios/me",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 5200,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_me_put",
+      "_type": "request",
+      "parentId": "fld_user",
+      "name": "Editar mi perfil",
+      "description": "",
+      "method": "PUT",
+      "url": "{{ _.baseUrl }}/api/usuarios/me",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 5300,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nombre\": \"Martin Ariel\",\n  \"apellido\": \"Alvarez\",\n  \"email\": \"compras@vtvcentro.com.ar\"\n}"
+      }
+    },
+    {
+      "_id": "req_users",
+      "_type": "request",
+      "parentId": "fld_user",
+      "name": "Listar usuarios (ADMIN)",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/usuarios",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenAdmin }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 5400,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_user_id",
+      "_type": "request",
+      "parentId": "fld_user",
+      "name": "Detalle de usuario (ADMIN)",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/usuarios/5",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenAdmin }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 5500,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_user_rol",
+      "_type": "request",
+      "parentId": "fld_user",
+      "name": "Cambiar el ROL de una cuenta (ADMIN)",
+      "description": "Requisito del enunciado: administracion de cuentas con asignacion de permisos.",
+      "method": "PUT",
+      "url": "{{ _.baseUrl }}/api/usuarios/5/rol",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenAdmin }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 5600,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"rol\": \"VENDEDOR\"\n}"
+      }
+    },
+    {
+      "_id": "req_user_estado",
+      "_type": "request",
+      "parentId": "fld_user",
+      "name": "Deshabilitar una cuenta (ADMIN)",
+      "description": "",
+      "method": "PUT",
+      "url": "{{ _.baseUrl }}/api/usuarios/5/estado",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenAdmin }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 5700,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"activo\": false\n}"
+      }
+    },
+    {
+      "_id": "req_login_deshab",
+      "_type": "request",
+      "parentId": "fld_user",
+      "name": "Cuenta deshabilitada intenta loguear -> 401",
+      "description": "401. La valida el AuthService y tambien el filtro JWT.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/auth/login",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 5800,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"tuning.rp\",\n  \"password\": \"comprador1234\"\n}"
+      }
+    },
+    {
+      "_id": "req_user_estado_on",
+      "_type": "request",
+      "parentId": "fld_user",
+      "name": "Volver a habilitar la cuenta (ADMIN)",
+      "description": "",
+      "method": "PUT",
+      "url": "{{ _.baseUrl }}/api/usuarios/5/estado",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenAdmin }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 5900,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"activo\": true\n}"
+      }
+    },
+    {
+      "_id": "req_user_403",
+      "_type": "request",
+      "parentId": "fld_user",
+      "name": "COMPRADOR intenta listar usuarios -> 403",
+      "description": "403 Forbidden.",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/usuarios",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 6000,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "fld_fotos",
+      "_type": "request_group",
+      "parentId": "wrk_motorroll",
+      "name": "3b. Fotos del producto (multipart)",
+      "description": "Subida de fotos como archivo, con multipart/form-data. Los bytes se guardan en la base y la API los devuelve como imagen o en base64.",
+      "metaSortKey": 2200.0,
+      "environment": {},
+      "authentication": {}
+    },
+    {
+      "_id": "req_foto_ver",
+      "_type": "request",
+      "parentId": "fld_fotos",
+      "name": "Ver la foto (publico, se abre en el navegador)",
+      "description": "200 con la imagen. Es publico: el catalogo se ve sin token. Insomnia la muestra en la pestania Preview.",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/productos/1/imagenes/1/contenido",
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 2201.0,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_foto_b64",
+      "_type": "request",
+      "parentId": "fld_fotos",
+      "name": "Ver la foto en base64 (formato de la catedra)",
+      "description": "200 con el JSON: contentType, tamanio y el contenido en base64. El front lo usa asi: <img src={`data:image/jpeg;base64,${base64}`} />",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/api/productos/1/imagenes/1",
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 2202.0,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_foto_subir",
+      "_type": "request",
+      "parentId": "fld_fotos",
+      "name": "SUBIR una foto (multipart/form-data)",
+      "description": "201. Fijate en la pestania Body: no es JSON, es multipart. El campo 'imagen' es un archivo. Para elegir otra foto, tocar el campo y buscarla. Devuelve el id y la direccion de la foto nueva.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/productos/1/imagenes",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenVendedor }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 2203.0,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "multipart/form-data",
+        "params": [
+          {
+            "id": "pair_imagen",
+            "name": "imagen",
+            "type": "file",
+            "value": "",
+            "fileName": "C:\\Repositorios\\motorroll-api\\src\\main\\resources\\imagenes-demo\\dt800-a.jpg",
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "_id": "req_foto_subir_orden",
+      "_type": "request",
+      "parentId": "fld_fotos",
+      "name": "SUBIR indicando la posicion en la galeria",
+      "description": "Con orden=0 la foto queda como portada del producto en el catalogo.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/productos/1/imagenes?orden=0",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenVendedor }}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "orden",
+          "value": "0",
+          "disabled": false
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 2204.0,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "multipart/form-data",
+        "params": [
+          {
+            "id": "pair_imagen",
+            "name": "imagen",
+            "type": "file",
+            "value": "",
+            "fileName": "C:\\Repositorios\\motorroll-api\\src\\main\\resources\\imagenes-demo\\dt800-a.jpg",
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "_id": "req_foto_sin_token",
+      "_type": "request",
+      "parentId": "fld_fotos",
+      "name": "Subir SIN token -> 401",
+      "description": "401. Subir fotos requiere estar logueado.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/productos/1/imagenes",
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 2205.0,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "multipart/form-data",
+        "params": [
+          {
+            "id": "pair_imagen",
+            "name": "imagen",
+            "type": "file",
+            "value": "",
+            "fileName": "C:\\Repositorios\\motorroll-api\\src\\main\\resources\\imagenes-demo\\dt800-a.jpg",
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "_id": "req_foto_ajeno",
+      "_type": "request",
+      "parentId": "fld_fotos",
+      "name": "Subir a producto de OTRO vendedor -> 403",
+      "description": "403. Estamos logueados como motorroll, pero el producto 2 (DT-800) lo publico dynotech. Spring Security no puede resolver esto por rol: los dos son VENDEDOR. Se valida en el servicio comparando el id del vendedor del producto con el del usuario logueado.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/productos/2/imagenes",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenVendedor }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 2206.0,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "multipart/form-data",
+        "params": [
+          {
+            "id": "pair_imagen",
+            "name": "imagen",
+            "type": "file",
+            "value": "",
+            "fileName": "C:\\Repositorios\\motorroll-api\\src\\main\\resources\\imagenes-demo\\dt800-a.jpg",
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "_id": "req_foto_comprador",
+      "_type": "request",
+      "parentId": "fld_fotos",
+      "name": "COMPRADOR intenta subir -> 403",
+      "description": "403. Solo los vendedores publican y editan sus productos.",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/api/productos/1/imagenes",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 2207.0,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "multipart/form-data",
+        "params": [
+          {
+            "id": "pair_imagen",
+            "name": "imagen",
+            "type": "file",
+            "value": "",
+            "fileName": "C:\\Repositorios\\motorroll-api\\src\\main\\resources\\imagenes-demo\\dt800-a.jpg",
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "_id": "req_foto_borrar",
+      "_type": "request",
+      "parentId": "fld_fotos",
+      "name": "Borrar una foto de la galeria",
+      "description": "204. Cambiar el 3 por el id que devolvio la subida.",
+      "method": "DELETE",
+      "url": "{{ _.baseUrl }}/api/productos/1/imagenes/3",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.tokenVendedor }}"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 2208.0,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    }
+  ]
+}

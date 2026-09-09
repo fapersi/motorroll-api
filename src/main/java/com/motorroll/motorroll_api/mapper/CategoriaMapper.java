@@ -8,7 +8,6 @@ import java.util.List;
 
 @Component
 public class CategoriaMapper {
-
     public CategoriaResponse aResponse(Categoria categoria) {
         Categoria padre = categoria.getCategoriaPadre();
 

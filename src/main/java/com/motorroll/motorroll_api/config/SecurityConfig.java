@@ -22,18 +22,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * Configuracion de seguridad de la API.
- *
- * La API es stateless: no hay sesion de servidor, cada request se autentica con su token JWT.
- * Lo que es catalogo publico (ver productos y categorias) no pide token; todo lo demas si.
- */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
@@ -43,18 +36,20 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sesion -> sesion.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(rutas -> rutas
-                        // Ojo con el orden: esta ruta tiene que evaluarse antes que /api/productos/*
+
                         .requestMatchers(HttpMethod.GET, "/api/productos/mis-publicaciones").authenticated()
-                        // --- Publico ---
+
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/productos", "/api/productos/*", "/api/productos/marcas").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/productos/*/imagenes/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categorias", "/api/categorias/*").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
-                        // --- Solo administrador ---
+
                         .requestMatchers(HttpMethod.POST, "/api/categorias/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/categorias/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/categorias/**").hasRole("ADMIN")
-                        // --- El resto necesita token ---
+
                         .anyRequest().authenticated())
                 .exceptionHandling(errores -> errores
                         .authenticationEntryPoint((request, response, ex) ->
@@ -63,20 +58,18 @@ public class SecurityConfig {
                         .accessDeniedHandler((request, response, ex) ->
                                 escribirError(response, HttpStatus.FORBIDDEN,
                                         "Tu rol no tiene permiso para esta operacion", request.getRequestURI())))
-                // la consola de H2 se dibuja dentro de un frame
+
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    /** BCrypt: la contrasenia se guarda hasheada, nunca en texto plano. */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /** Habilita que el front (React + Vite en localhost:5173) consuma la API. */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuracion = new CorsConfiguration();
@@ -90,7 +83,6 @@ public class SecurityConfig {
         return fuente;
     }
 
-    /** Devuelve el mismo formato de error que el ManejadorGlobalDeExcepciones. */
     private void escribirError(jakarta.servlet.http.HttpServletResponse response,
                                HttpStatus status, String mensaje, String path) throws java.io.IOException {
         response.setStatus(status.value());

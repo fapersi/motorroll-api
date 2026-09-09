@@ -6,10 +6,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-/** Traduce entidades a DTO para que la API nunca exponga la contrasenia ni las relaciones internas. */
 @Component
 public class UsuarioMapper {
-
     public UsuarioResponse aResponse(Usuario usuario) {
         return UsuarioResponse.builder()
                 .id(usuario.getId())

@@ -12,10 +12,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Cada comprador tiene como maximo un carrito ABIERTO.
- * Al hacer el checkout ese carrito pasa a CONFIRMADO y se genera una Orden.
- */
 @Entity
 @Table(name = "carritos")
 @Getter
@@ -24,7 +20,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Carrito {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -57,7 +52,6 @@ public class Carrito {
         this.items.add(item);
     }
 
-    /** Total del carrito con los descuentos vigentes ya aplicados. */
     public BigDecimal calcularTotal() {
         return items.stream()
                 .map(ItemCarrito::calcularSubtotal)

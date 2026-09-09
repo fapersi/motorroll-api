@@ -10,10 +10,6 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Categoria del catalogo. Admite jerarquia (una categoria puede tener una categoria padre),
- * por ejemplo: "Bancos de potencia" -> "Inercial".
- */
 @Entity
 @Table(name = "categorias")
 @Getter
@@ -22,7 +18,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Categoria {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

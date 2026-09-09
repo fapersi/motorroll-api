@@ -11,13 +11,8 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-/**
- * Genera y valida los tokens JWT. El token viaja en el header Authorization
- * y reemplaza a la sesion: la API es stateless.
- */
 @Service
 public class JwtService {
-
     private final SecretKey clave;
     private final long expiracionMs;
 
@@ -49,7 +44,6 @@ public class JwtService {
         return leerClaims(token).get("rol", String.class);
     }
 
-    /** Lanza JwtException si la firma no coincide o si el token esta vencido. */
     private Claims leerClaims(String token) {
         return Jwts.parser()
                 .verifyWith(clave)

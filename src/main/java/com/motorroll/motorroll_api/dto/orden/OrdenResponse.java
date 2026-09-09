@@ -15,7 +15,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrdenResponse {
-
     private Long id;
     private LocalDateTime fecha;
     private EstadoOrden estado;

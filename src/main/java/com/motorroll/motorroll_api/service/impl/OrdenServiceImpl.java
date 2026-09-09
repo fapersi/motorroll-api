@@ -13,11 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/** Historial de compras: cada usuario solo puede ver sus propias ordenes. */
 @Service
 @RequiredArgsConstructor
 public class OrdenServiceImpl implements OrdenService {
-
     private final OrdenRepository ordenRepository;
     private final UsuarioService usuarioService;
     private final OrdenMapper ordenMapper;

@@ -12,10 +12,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Resultado del checkout. No hay procesamiento de pago (fuera del alcance del enunciado):
- * el flujo termina con la orden confirmada y el stock descontado.
- */
 @Entity
 @Table(name = "ordenes")
 @Getter
@@ -24,7 +20,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Orden {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

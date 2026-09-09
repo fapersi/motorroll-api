@@ -8,13 +8,11 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/** Vista publica del usuario: nunca expone la contrasenia. */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class UsuarioResponse {
-
     private Long id;
     private String username;
     private String email;

@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemCarrito {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,7 +32,6 @@ public class ItemCarrito {
     @Column(nullable = false)
     private Integer cantidad;
 
-    /** Precio de lista congelado al momento de agregar el item al carrito. */
     @Column(name = "precio_unitario", nullable = false, precision = 12, scale = 2)
     private BigDecimal precioUnitario;
 

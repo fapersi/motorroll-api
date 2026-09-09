@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FichaTecnicaResponse {
-
     private Integer potenciaMaximaHp;
     private Integer velocidadMaximaKmh;
     private String tipoTraccion;

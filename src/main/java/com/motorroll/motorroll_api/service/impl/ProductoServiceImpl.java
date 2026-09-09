@@ -1,12 +1,16 @@
 package com.motorroll.motorroll_api.service.impl;
 
+import com.motorroll.motorroll_api.dto.producto.ArchivoImagen;
 import com.motorroll.motorroll_api.dto.producto.FichaTecnicaRequest;
+import com.motorroll.motorroll_api.dto.producto.ImagenContenidoResponse;
 import com.motorroll.motorroll_api.dto.producto.ImagenRequest;
+import com.motorroll.motorroll_api.dto.producto.ImagenResponse;
 import com.motorroll.motorroll_api.dto.producto.ProductoDetalleResponse;
 import com.motorroll.motorroll_api.dto.producto.ProductoRequest;
 import com.motorroll.motorroll_api.dto.producto.ProductoResumenResponse;
 import com.motorroll.motorroll_api.exception.OperacionNoPermitidaException;
 import com.motorroll.motorroll_api.exception.RecursoNoEncontradoException;
+import com.motorroll.motorroll_api.exception.ReglaDeNegocioException;
 import com.motorroll.motorroll_api.mapper.ProductoMapper;
 import com.motorroll.motorroll_api.model.Categoria;
 import com.motorroll.motorroll_api.model.FichaTecnica;
@@ -22,29 +26,27 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Base64;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class ProductoServiceImpl implements ProductoService {
-
     private final ProductoRepository productoRepository;
     private final CategoriaRepository categoriaRepository;
     private final UsuarioService usuarioService;
     private final ProductoMapper productoMapper;
-
-    // ------------------------------------------------------------------
-    // Catalogo publico
-    // ------------------------------------------------------------------
 
     @Override
     @Transactional(readOnly = true)
     public List<ProductoResumenResponse> buscar(String texto, Long categoriaId, String marca,
                                                 BigDecimal precioMin, BigDecimal precioMax,
                                                 boolean soloConStock, String ordenarPor) {
-
         List<Producto> productos = productoRepository.buscarConFiltros(
                 normalizar(texto), categoriaId, normalizar(marca),
                 precioMin, precioMax, soloConStock, armarOrden(ordenarPor));
@@ -66,10 +68,6 @@ public class ProductoServiceImpl implements ProductoService {
     public List<String> listarMarcas() {
         return productoRepository.listarMarcas();
     }
-
-    // ------------------------------------------------------------------
-    // Gestion de publicaciones (vendedor)
-    // ------------------------------------------------------------------
 
     @Override
     @Transactional(readOnly = true)
@@ -159,16 +157,111 @@ public class ProductoServiceImpl implements ProductoService {
     public void eliminar(String username, Long id) {
         Producto producto = buscarPropio(username, id);
 
-        // Baja logica: la publicacion sale del catalogo pero las ordenes viejas la siguen referenciando.
         producto.setActivo(false);
         productoRepository.save(producto);
     }
 
-    // ------------------------------------------------------------------
-    // Auxiliares
-    // ------------------------------------------------------------------
+    @Override
+    @Transactional
+    public ImagenResponse agregarImagen(String username, Long productoId, MultipartFile archivo, Integer orden) {
+        Producto producto = buscarPropio(username, productoId);
+        validarArchivo(archivo);
 
-    /** El vendedor solo puede tocar sus propias publicaciones; el admin puede moderar cualquiera. */
+        byte[] datos;
+        try {
+            datos = archivo.getBytes();
+        } catch (IOException e) {
+            throw new ReglaDeNegocioException("No se pudo leer el archivo enviado: " + e.getMessage());
+        }
+
+        int posicion = orden != null ? orden : producto.getImagenes().size();
+
+        ImagenProducto imagen = ImagenProducto.builder()
+                .datos(datos)
+                .contentType(archivo.getContentType())
+                .nombreArchivo(archivo.getOriginalFilename())
+                .orden(posicion)
+                .build();
+
+        producto.agregarImagen(imagen);
+
+        productoRepository.flush();
+
+        return productoMapper.aImagenes(List.of(imagen)).get(0);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ArchivoImagen obtenerContenidoDeImagen(Long productoId, Long imagenId) {
+        ImagenProducto imagen = buscarImagen(productoId, imagenId);
+
+        if (!imagen.esArchivoSubido()) {
+            throw new ReglaDeNegocioException(
+                    "Esta imagen es externa, se accede por su url: " + imagen.getUrl());
+        }
+
+        return new ArchivoImagen(imagen.getDatos(), imagen.getContentType(), imagen.getNombreArchivo());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ImagenContenidoResponse obtenerImagenEnBase64(Long productoId, Long imagenId) {
+        ImagenProducto imagen = buscarImagen(productoId, imagenId);
+
+        if (!imagen.esArchivoSubido()) {
+            throw new ReglaDeNegocioException(
+                    "Esta imagen es externa, se accede por su url: " + imagen.getUrl());
+        }
+
+        return ImagenContenidoResponse.builder()
+                .id(imagen.getId())
+                .nombreArchivo(imagen.getNombreArchivo())
+                .contentType(imagen.getContentType())
+                .tamanioBytes(imagen.getDatos().length)
+                .orden(imagen.getOrden())
+                .base64(Base64.getEncoder().encodeToString(imagen.getDatos()))
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void eliminarImagen(String username, Long productoId, Long imagenId) {
+        Producto producto = buscarPropio(username, productoId);
+
+        ImagenProducto imagen = producto.getImagenes().stream()
+                .filter(i -> i.getId().equals(imagenId))
+                .findFirst()
+                .orElseThrow(() -> new RecursoNoEncontradoException("la imagen", imagenId));
+
+        producto.getImagenes().remove(imagen);
+        productoRepository.flush();
+    }
+
+    private static final Set<String> TIPOS_PERMITIDOS =
+            Set.of("image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif");
+
+    private void validarArchivo(MultipartFile archivo) {
+        if (archivo == null || archivo.isEmpty()) {
+            throw new ReglaDeNegocioException("Tenes que adjuntar un archivo de imagen");
+        }
+
+        String tipo = archivo.getContentType();
+        if (tipo == null || !TIPOS_PERMITIDOS.contains(tipo.toLowerCase())) {
+            throw new ReglaDeNegocioException(
+                    "El archivo tiene que ser una imagen (JPG, PNG, WEBP o GIF). Se recibio: " + tipo);
+        }
+    }
+
+    private ImagenProducto buscarImagen(Long productoId, Long imagenId) {
+        Producto producto = productoRepository.findById(productoId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("el producto", productoId));
+
+        return producto.getImagenes().stream()
+                .filter(imagen -> imagen.getId().equals(imagenId))
+                .findFirst()
+                .orElseThrow(() -> new RecursoNoEncontradoException("la imagen", imagenId));
+    }
+
     private Producto buscarPropio(String username, Long id) {
         Usuario usuario = usuarioService.buscarEntidadPorUsername(username);
 
@@ -241,7 +334,6 @@ public class ProductoServiceImpl implements ProductoService {
         ficha.setRequerimientosSala(request.getRequerimientosSala());
     }
 
-    /** Convierte el parametro ordenarPor de la URL en un Sort de Spring Data. */
     private Sort armarOrden(String ordenarPor) {
         if (ordenarPor == null || ordenarPor.isBlank()) {
             return Sort.by(Sort.Direction.DESC, "fechaAlta");
@@ -255,7 +347,6 @@ public class ProductoServiceImpl implements ProductoService {
         };
     }
 
-    /** Los filtros de texto vacios se tratan como sin filtro. */
     private String normalizar(String valor) {
         return (valor == null || valor.isBlank()) ? null : valor.trim();
     }

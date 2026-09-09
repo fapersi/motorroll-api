@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ActualizarPerfilRequest {
-
     @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
 

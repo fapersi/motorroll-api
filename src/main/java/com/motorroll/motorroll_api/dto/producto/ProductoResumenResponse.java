@@ -7,13 +7,11 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-/** Vista de grilla del catalogo: foto de portada, nombre, marca, precio y estado de stock. */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductoResumenResponse {
-
     private Long id;
     private String nombre;
     private String marca;

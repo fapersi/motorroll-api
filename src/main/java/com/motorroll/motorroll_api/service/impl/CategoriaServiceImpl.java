@@ -19,7 +19,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CategoriaServiceImpl implements CategoriaService {
-
     private final CategoriaRepository categoriaRepository;
     private final CategoriaMapper categoriaMapper;
 
@@ -38,7 +37,6 @@ public class CategoriaServiceImpl implements CategoriaService {
     @Override
     @Transactional
     public CategoriaResponse crear(CategoriaRequest request) {
-        // El usuario solo manda la descripcion y el nombre: el id lo genera la base.
         if (categoriaRepository.existsByNombreIgnoreCase(request.getNombre())) {
             throw new RecursoDuplicadoException("La categoria que intentas agregar ya existe: " + request.getNombre());
         }

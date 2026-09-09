@@ -7,9 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Cada publicacion puede adjuntar una o mas fotos del equipo.
- */
 @Entity
 @Table(name = "imagenes_producto")
 @Getter
@@ -18,15 +15,24 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ImagenProducto {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 500)
+    @Column(length = 500)
     private String url;
 
-    /** Posicion en la galeria: la de orden mas bajo es la portada del catalogo. */
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "datos")
+    private byte[] datos;
+
+    @Column(name = "content_type", length = 100)
+    private String contentType;
+
+    @Column(name = "nombre_archivo", length = 255)
+    private String nombreArchivo;
+
     @Builder.Default
     @Column(nullable = false)
     private Integer orden = 0;
@@ -34,4 +40,8 @@ public class ImagenProducto {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "producto_id", nullable = false)
     private Producto producto;
+
+    public boolean esArchivoSubido() {
+        return datos != null && datos.length > 0;
+    }
 }

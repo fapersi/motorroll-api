@@ -12,15 +12,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Arbol de categorias del catalogo.
- * Consultar es publico; crear, editar y borrar es solo del administrador.
- */
 @RestController
 @RequestMapping("/api/categorias")
 @RequiredArgsConstructor
 public class CategoriaController {
-
     private final CategoriaService categoriaService;
 
     @GetMapping

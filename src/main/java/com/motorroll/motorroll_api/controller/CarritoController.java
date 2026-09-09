@@ -12,15 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Carrito del usuario logueado: agregar, modificar y eliminar productos,
- * y confirmar la compra con el calculo automatico del total.
- */
 @RestController
 @RequestMapping("/api/carrito")
 @RequiredArgsConstructor
 public class CarritoController {
-
     private final CarritoService carritoService;
 
     @GetMapping
@@ -53,7 +48,6 @@ public class CarritoController {
         return ResponseEntity.ok(carritoService.vaciar(authentication.getName()));
     }
 
-    /** Checkout sin procesamiento de pago: valida y descuenta el stock, y genera la orden. */
     @PostMapping("/checkout")
     public ResponseEntity<OrdenResponse> checkout(Authentication authentication) {
         return ResponseEntity.status(HttpStatus.CREATED).body(carritoService.checkout(authentication.getName()));

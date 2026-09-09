@@ -2,13 +2,18 @@ package com.motorroll.motorroll_api.controller;
 
 import com.motorroll.motorroll_api.dto.producto.ActualizarDescuentoRequest;
 import com.motorroll.motorroll_api.dto.producto.ActualizarStockRequest;
+import com.motorroll.motorroll_api.dto.producto.ArchivoImagen;
+import com.motorroll.motorroll_api.dto.producto.ImagenContenidoResponse;
+import com.motorroll.motorroll_api.dto.producto.ImagenResponse;
 import com.motorroll.motorroll_api.dto.producto.ProductoDetalleResponse;
 import com.motorroll.motorroll_api.dto.producto.ProductoRequest;
 import com.motorroll.motorroll_api.dto.producto.ProductoResumenResponse;
 import com.motorroll.motorroll_api.service.ProductoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,27 +26,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-/**
- * Catalogo y gestion de publicaciones.
- *
- * Los GET del catalogo son publicos (se pueden ver los productos sin estar logueado).
- * El alta, la edicion, el stock, el descuento y la baja los hace el vendedor duenio de la publicacion.
- */
 @RestController
 @RequestMapping("/api/productos")
 @RequiredArgsConstructor
 public class ProductoController {
-
     private final ProductoService productoService;
 
-    /**
-     * Catalogo con busqueda y filtrado. Todos los parametros son opcionales:
-     * GET /api/productos?texto=inercial&categoriaId=2&precioMin=1000&precioMax=90000&ordenarPor=precio_asc
-     */
     @GetMapping
     public ResponseEntity<List<ProductoResumenResponse>> buscar(
             @RequestParam(required = false) String texto,
@@ -51,32 +46,25 @@ public class ProductoController {
             @RequestParam(required = false) BigDecimal precioMax,
             @RequestParam(required = false, defaultValue = "false") boolean soloConStock,
             @RequestParam(required = false) String ordenarPor) {
-
         return ResponseEntity.ok(productoService.buscar(
                 texto, categoriaId, marca, precioMin, precioMax, soloConStock, ordenarPor));
     }
 
-    /** Marcas disponibles, para armar el filtro del front. */
     @GetMapping("/marcas")
     public ResponseEntity<List<String>> listarMarcas() {
         return ResponseEntity.ok(productoService.listarMarcas());
     }
 
-    /** Detalle del producto: imagenes, descripcion y ficha tecnica. */
     @GetMapping("/{id}")
     public ResponseEntity<ProductoDetalleResponse> obtener(@PathVariable Long id) {
         return ResponseEntity.ok(productoService.obtenerDetalle(id));
     }
 
-    // ---------------- Gestion de productos (vendedor) ----------------
-
-    /** Publicaciones del vendedor logueado, incluidas las dadas de baja. */
     @GetMapping("/mis-publicaciones")
     public ResponseEntity<List<ProductoDetalleResponse>> misPublicaciones(Authentication authentication) {
         return ResponseEntity.ok(productoService.misPublicaciones(authentication.getName()));
     }
 
-    /** Alta de una publicacion con una o mas fotos, descripcion, categoria y precio. */
     @PostMapping
     public ResponseEntity<ProductoDetalleResponse> crear(Authentication authentication,
                                                          @Valid @RequestBody ProductoRequest request) {
@@ -91,7 +79,6 @@ public class ProductoController {
         return ResponseEntity.ok(productoService.actualizar(authentication.getName(), id, request));
     }
 
-    /** El usuario que crea el producto maneja el stock del mismo. */
     @PatchMapping("/{id}/stock")
     public ResponseEntity<ProductoDetalleResponse> actualizarStock(Authentication authentication,
                                                                    @PathVariable Long id,
@@ -100,21 +87,52 @@ public class ProductoController {
                 productoService.actualizarStock(authentication.getName(), id, request.getStock()));
     }
 
-    /** Gestion de descuentos sobre productos individuales. */
     @PatchMapping("/{id}/descuento")
     public ResponseEntity<ProductoDetalleResponse> actualizarDescuento(
             Authentication authentication,
             @PathVariable Long id,
             @Valid @RequestBody ActualizarDescuentoRequest request) {
-
         return ResponseEntity.ok(
                 productoService.actualizarDescuento(authentication.getName(), id, request.getDescuento()));
     }
 
-    /** Baja de la publicacion. */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(Authentication authentication, @PathVariable Long id) {
         productoService.eliminar(authentication.getName(), id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping(path = "/{id}/imagenes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ImagenResponse> subirImagen(Authentication authentication,
+                                                      @PathVariable Long id,
+                                                      @RequestParam("imagen") MultipartFile imagen,
+                                                      @RequestParam(required = false) Integer orden) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(productoService.agregarImagen(authentication.getName(), id, imagen, orden));
+    }
+
+    @GetMapping("/{id}/imagenes/{imagenId}/contenido")
+    public ResponseEntity<byte[]> verImagen(@PathVariable Long id, @PathVariable Long imagenId) {
+        ArchivoImagen archivo = productoService.obtenerContenidoDeImagen(id, imagenId);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(archivo.contentType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + archivo.nombreArchivo() + "\"")
+                .body(archivo.datos());
+    }
+
+    @GetMapping("/{id}/imagenes/{imagenId}")
+    public ResponseEntity<ImagenContenidoResponse> verImagenBase64(@PathVariable Long id,
+                                                                   @PathVariable Long imagenId) {
+        return ResponseEntity.ok(productoService.obtenerImagenEnBase64(id, imagenId));
+    }
+
+    @DeleteMapping("/{id}/imagenes/{imagenId}")
+    public ResponseEntity<Void> eliminarImagen(Authentication authentication,
+                                               @PathVariable Long id,
+                                               @PathVariable Long imagenId) {
+        productoService.eliminarImagen(authentication.getName(), id, imagenId);
         return ResponseEntity.noContent().build();
     }
 }

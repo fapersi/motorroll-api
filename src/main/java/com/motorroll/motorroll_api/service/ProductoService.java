@@ -1,15 +1,17 @@
 package com.motorroll.motorroll_api.service;
 
+import com.motorroll.motorroll_api.dto.producto.ArchivoImagen;
+import com.motorroll.motorroll_api.dto.producto.ImagenContenidoResponse;
+import com.motorroll.motorroll_api.dto.producto.ImagenResponse;
 import com.motorroll.motorroll_api.dto.producto.ProductoDetalleResponse;
 import com.motorroll.motorroll_api.dto.producto.ProductoRequest;
 import com.motorroll.motorroll_api.dto.producto.ProductoResumenResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 public interface ProductoService {
-
-    /** Catalogo publico: todos los filtros son opcionales. */
     List<ProductoResumenResponse> buscar(String texto,
                                          Long categoriaId,
                                          String marca,
@@ -22,8 +24,6 @@ public interface ProductoService {
 
     List<String> listarMarcas();
 
-    // --- Operaciones del vendedor duenio de la publicacion ---
-
     List<ProductoDetalleResponse> misPublicaciones(String username);
 
     ProductoDetalleResponse crear(String username, ProductoRequest request);
@@ -34,6 +34,13 @@ public interface ProductoService {
 
     ProductoDetalleResponse actualizarDescuento(String username, Long id, Integer descuento);
 
-    /** Baja logica de la publicacion. */
     void eliminar(String username, Long id);
+
+    ImagenResponse agregarImagen(String username, Long productoId, MultipartFile archivo, Integer orden);
+
+    ArchivoImagen obtenerContenidoDeImagen(Long productoId, Long imagenId);
+
+    ImagenContenidoResponse obtenerImagenEnBase64(Long productoId, Long imagenId);
+
+    void eliminarImagen(String username, Long productoId, Long imagenId);
 }

@@ -9,10 +9,6 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
-/**
- * Renglon de la orden. Congela nombre, precio y descuento del momento de la compra,
- * para que el historial no cambie si despues el vendedor edita la publicacion.
- */
 @Entity
 @Table(name = "items_orden")
 @Getter
@@ -21,7 +17,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemOrden {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

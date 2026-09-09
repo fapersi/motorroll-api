@@ -14,11 +14,9 @@ import java.util.List;
 
 @Component
 public class ProductoMapper {
-
     private static final Comparator<ImagenProducto> POR_ORDEN =
             Comparator.comparing(ImagenProducto::getOrden, Comparator.nullsLast(Comparator.naturalOrder()));
 
-    /** Version corta, la que se usa en la grilla del catalogo. */
     public ProductoResumenResponse aResumen(Producto producto) {
         return ProductoResumenResponse.builder()
                 .id(producto.getId())
@@ -41,7 +39,6 @@ public class ProductoMapper {
         return productos.stream().map(this::aResumen).toList();
     }
 
-    /** Version completa, la que se usa en la pantalla de detalle del producto. */
     public ProductoDetalleResponse aDetalle(Producto producto) {
         return ProductoDetalleResponse.builder()
                 .id(producto.getId())
@@ -73,10 +70,20 @@ public class ProductoMapper {
                 .sorted(POR_ORDEN)
                 .map(imagen -> ImagenResponse.builder()
                         .id(imagen.getId())
-                        .url(imagen.getUrl())
+                        .url(direccionDe(imagen))
                         .orden(imagen.getOrden())
+                        .tipo(imagen.esArchivoSubido() ? "ARCHIVO" : "URL")
+                        .nombreArchivo(imagen.getNombreArchivo())
                         .build())
                 .toList();
+    }
+
+    public static String direccionDe(ImagenProducto imagen) {
+        if (!imagen.esArchivoSubido()) {
+            return imagen.getUrl();
+        }
+        return "/api/productos/" + imagen.getProducto().getId()
+                + "/imagenes/" + imagen.getId() + "/contenido";
     }
 
     public FichaTecnicaResponse aFichaTecnica(FichaTecnica ficha) {
@@ -93,14 +100,13 @@ public class ProductoMapper {
                 .build();
     }
 
-    /** Imagen de portada: la de menor orden. Devuelve null si la publicacion no tiene fotos. */
     public String buscarPortada(Producto producto) {
         if (producto.getImagenes() == null || producto.getImagenes().isEmpty()) {
             return null;
         }
         return producto.getImagenes().stream()
                 .min(POR_ORDEN)
-                .map(ImagenProducto::getUrl)
+                .map(ProductoMapper::direccionDe)
                 .orElse(null);
     }
 }

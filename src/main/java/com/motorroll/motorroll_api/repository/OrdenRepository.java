@@ -9,7 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface OrdenRepository extends JpaRepository<Orden, Long> {
-
     List<Orden> findByCompradorIdOrderByFechaDesc(Long compradorId);
 
     Optional<Orden> findByIdAndCompradorId(Long id, Long compradorId);

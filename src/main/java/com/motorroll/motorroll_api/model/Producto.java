@@ -13,10 +13,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Publicacion del catalogo: un banco de potencia, un sensor, un repuesto,
- * o un servicio (calibracion / instalacion), en cuyo caso el stock representa cupos.
- */
 @Entity
 @Table(name = "productos")
 @Getter
@@ -25,7 +21,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Producto {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,7 +31,6 @@ public class Producto {
     @Column(nullable = false, length = 2000)
     private String descripcion;
 
-    /** Precio de lista en USD, sin descuento aplicado. */
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal precio;
 
@@ -46,17 +40,14 @@ public class Producto {
     @Column(length = 80)
     private String marca;
 
-    /** Descuento porcentual (0 a 100) que aplica el vendedor duenio de la publicacion. */
     @Builder.Default
     @Column(nullable = false)
     private Integer descuento = 0;
 
-    /** Baja logica: la publicacion deja de verse en el catalogo pero no se borra el historial. */
     @Builder.Default
     @Column(nullable = false)
     private boolean activo = true;
 
-    /** true cuando el item es un servicio (calibracion, instalacion) y el stock son cupos. */
     @Builder.Default
     @Column(name = "es_servicio", nullable = false)
     private boolean esServicio = false;
@@ -86,7 +77,6 @@ public class Producto {
         }
     }
 
-    /** Precio unitario con el descuento vigente ya aplicado. */
     public BigDecimal calcularPrecioFinal() {
         if (descuento == null || descuento <= 0) {
             return precio.setScale(2, RoundingMode.HALF_UP);
@@ -100,7 +90,6 @@ public class Producto {
         return stock != null && stock >= cantidad;
     }
 
-    /** Agrega la imagen manteniendo sincronizados los dos lados de la relacion. */
     public void agregarImagen(ImagenProducto imagen) {
         imagen.setProducto(this);
         this.imagenes.add(imagen);

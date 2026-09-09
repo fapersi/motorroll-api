@@ -19,14 +19,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Se ejecuta una vez por request: si viene un token valido en el header
- * "Authorization: Bearer ...", deja al usuario autenticado en el contexto de Spring Security.
- */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
     private static final String PREFIJO = "Bearer ";
 
     private final JwtService jwtService;
@@ -36,12 +31,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (header != null && header.startsWith(PREFIJO)
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
-
             String token = header.substring(PREFIJO.length());
             try {
                 String username = jwtService.extraerUsername(token);
@@ -49,9 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 usuarioRepository.findByUsername(username)
                         .filter(Usuario::isActivo)
                         .ifPresent(usuario -> autenticar(usuario, request));
-
             } catch (JwtException | IllegalArgumentException ex) {
-                // Token invalido o vencido: se sigue sin autenticar y el endpoint protegido devuelve 401.
                 SecurityContextHolder.clearContext();
             }
         }

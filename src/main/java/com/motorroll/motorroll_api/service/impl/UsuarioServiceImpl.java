@@ -16,14 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/**
- * Capa de logica de negocio de usuarios.
- * La anotacion @Service le avisa a Spring que esta clase es un bean para inyectar.
- */
 @Service
 @RequiredArgsConstructor
 public class UsuarioServiceImpl implements UsuarioService {
-
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
 
@@ -38,7 +33,6 @@ public class UsuarioServiceImpl implements UsuarioService {
     public UsuarioResponse actualizarPerfil(String username, ActualizarPerfilRequest request) {
         Usuario usuario = buscarEntidadPorUsername(username);
 
-        // Si cambia el mail, no puede pisar el de otra cuenta.
         if (!usuario.getEmail().equalsIgnoreCase(request.getEmail())
                 && usuarioRepository.existsByEmail(request.getEmail())) {
             throw new RecursoDuplicadoException("Ya existe una cuenta registrada con el mail " + request.getEmail());

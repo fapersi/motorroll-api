@@ -7,9 +7,7 @@ import com.motorroll.motorroll_api.model.Usuario;
 
 import java.util.List;
 
-/** Administracion de cuentas de usuario, incluyendo la asignacion de permisos. */
 public interface UsuarioService {
-
     UsuarioResponse verPerfil(String username);
 
     UsuarioResponse actualizarPerfil(String username, ActualizarPerfilRequest request);
@@ -24,6 +22,5 @@ public interface UsuarioService {
 
     void eliminar(Long id);
 
-    /** Uso interno de los demas servicios: devuelve la entidad del usuario logueado. */
     Usuario buscarEntidadPorUsername(String username);
 }

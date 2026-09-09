@@ -9,13 +9,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/** Ficha completa del producto, con la galeria de imagenes y los datos tecnicos. */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductoDetalleResponse {
-
     private Long id;
     private String nombre;
     private String descripcion;

@@ -9,12 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Tests de la logica de precios y stock, que es la parte del negocio
- * de la que dependen el carrito y el checkout.
- */
 class CalculoDePreciosTest {
-
     private Producto banco(String precio, int stock, int descuento) {
         return Producto.builder()
                 .nombre("Banco de potencia inercial MR-1200")
@@ -80,7 +75,6 @@ class CalculoDePreciosTest {
                 .precioUnitario(sonda.getPrecio())
                 .build());
 
-        // 48500.00 + (655.50 x 3) = 50466.50
         assertEquals(new BigDecimal("50466.50"), carrito.calcularTotal());
     }
 }

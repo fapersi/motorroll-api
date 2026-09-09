@@ -14,7 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CarritoResponse {
-
     private Long id;
     private EstadoCarrito estado;
     private List<ItemCarritoResponse> items;

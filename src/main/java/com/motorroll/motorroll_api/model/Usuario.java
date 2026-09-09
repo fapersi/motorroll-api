@@ -17,9 +17,8 @@ import java.util.List;
 @Setter
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor // Hibernate necesita si o si un constructor vacio para construir los objetos
+@NoArgsConstructor
 public class Usuario {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,7 +29,6 @@ public class Usuario {
     @Column(nullable = false, unique = true, length = 120)
     private String email;
 
-    /** Se guarda hasheada con BCrypt, nunca en texto plano. */
     @Column(nullable = false)
     private String password;
 
@@ -51,12 +49,10 @@ public class Usuario {
     @Column(nullable = false)
     private boolean activo = true;
 
-    /** Publicaciones que este usuario puso a la venta (solo aplica a VENDEDOR). */
     @Builder.Default
     @OneToMany(mappedBy = "vendedor")
     private List<Producto> productos = new ArrayList<>();
 
-    /** Historial de compras del usuario. */
     @Builder.Default
     @OneToMany(mappedBy = "comprador")
     private List<Orden> ordenes = new ArrayList<>();

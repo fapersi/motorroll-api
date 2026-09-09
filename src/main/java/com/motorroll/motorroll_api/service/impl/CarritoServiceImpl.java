@@ -29,16 +29,9 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Carrito de compras y checkout.
- *
- * Cada comprador tiene un unico carrito ABIERTO. Al confirmar la compra se revalida
- * el stock item por item, recien ahi se descuenta, y el carrito pasa a CONFIRMADO.
- */
 @Service
 @RequiredArgsConstructor
 public class CarritoServiceImpl implements CarritoService {
-
     private final CarritoRepository carritoRepository;
     private final ProductoRepository productoRepository;
     private final OrdenRepository ordenRepository;
@@ -60,7 +53,6 @@ public class CarritoServiceImpl implements CarritoService {
         Producto producto = productoRepository.findByIdAndActivoTrue(request.getProductoId())
                 .orElseThrow(() -> new RecursoNoEncontradoException("el producto", request.getProductoId()));
 
-        // Requisito del enunciado: si el producto no tiene stock no se puede agregar al carrito.
         if (!producto.hayStockPara(1)) {
             throw new ReglaDeNegocioException(
                     "El producto " + producto.getNombre() + " esta sin stock. Consultar disponibilidad");
@@ -102,7 +94,6 @@ public class CarritoServiceImpl implements CarritoService {
         Carrito carrito = obtenerOCrearCarrito(username);
         ItemCarrito item = buscarItem(carrito, itemId);
 
-        // orphanRemoval = true hace que al sacarlo de la lista se borre de la tabla.
         carrito.getItems().remove(item);
 
         return carritoMapper.aResponse(carritoRepository.save(carrito));
@@ -143,7 +134,6 @@ public class CarritoServiceImpl implements CarritoService {
                         "La publicacion " + producto.getNombre() + " ya no esta disponible. Sacala del carrito para continuar");
             }
 
-            // Se revalida el stock recien al confirmar: otro comprador se pudo haber adelantado.
             validarStock(producto, item.getCantidad());
 
             BigDecimal precioUnitario = producto.calcularPrecioFinal();
@@ -168,16 +158,11 @@ public class CarritoServiceImpl implements CarritoService {
         ordenRepository.save(orden);
         productoRepository.saveAll(productosAActualizar);
 
-        // El carrito usado queda cerrado; en el proximo pedido se crea uno nuevo vacio.
         carrito.setEstado(EstadoCarrito.CONFIRMADO);
         carritoRepository.save(carrito);
 
         return ordenMapper.aResponse(orden);
     }
-
-    // ------------------------------------------------------------------
-    // Auxiliares
-    // ------------------------------------------------------------------
 
     private Carrito obtenerOCrearCarrito(String username) {
         Usuario comprador = usuarioService.buscarEntidadPorUsername(username);

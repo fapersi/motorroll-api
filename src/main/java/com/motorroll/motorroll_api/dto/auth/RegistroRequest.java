@@ -9,12 +9,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/** Datos que pide el enunciado para registrarse: usuario, mail, contrasenia, nombre y apellido. */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegistroRequest {
-
     @NotBlank(message = "El nombre de usuario es obligatorio")
     @Size(min = 4, max = 50, message = "El nombre de usuario debe tener entre 4 y 50 caracteres")
     private String username;
@@ -33,7 +31,6 @@ public class RegistroRequest {
     @NotBlank(message = "El apellido es obligatorio")
     private String apellido;
 
-    /** COMPRADOR o VENDEDOR. El rol ADMIN no se puede pedir desde el registro publico. */
     @NotNull(message = "Tenes que indicar si te registras como COMPRADOR o VENDEDOR")
     private Rol rol;
 }

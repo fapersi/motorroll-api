@@ -9,10 +9,6 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
-/**
- * Atributos tecnicos propios del rubro (dinamometros y equipamiento de testeo).
- * Es opcional: un repuesto o un servicio puede no tener ficha.
- */
 @Entity
 @Table(name = "fichas_tecnicas")
 @Getter
@@ -21,7 +17,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FichaTecnica {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,7 +27,6 @@ public class FichaTecnica {
     @Column(name = "velocidad_maxima_kmh")
     private Integer velocidadMaximaKmh;
 
-    /** Simple, doble o integral. */
     @Column(name = "tipo_traccion", length = 60)
     private String tipoTraccion;
 

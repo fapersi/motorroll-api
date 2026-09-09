@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AgregarItemRequest {
-
     @NotNull(message = "Tenes que indicar el producto")
     private Long productoId;
 

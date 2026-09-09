@@ -10,8 +10,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ImagenResponse {
-
     private Long id;
+
     private String url;
+
     private Integer orden;
+
+    private String tipo;
+
+    private String nombreArchivo;
 }
