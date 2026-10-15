@@ -1,5 +1,6 @@
 package com.motorroll.motorroll_api.service;
 
+import com.motorroll.motorroll_api.dto.auth.AuthResponse;
 import com.motorroll.motorroll_api.dto.usuario.ActualizarPerfilRequest;
 import com.motorroll.motorroll_api.dto.usuario.UsuarioResponse;
 import com.motorroll.motorroll_api.model.Rol;
@@ -10,7 +11,7 @@ import java.util.List;
 public interface UsuarioService {
     UsuarioResponse verPerfil(String username);
 
-    UsuarioResponse actualizarPerfil(String username, ActualizarPerfilRequest request);
+    AuthResponse actualizarPerfil(String username, ActualizarPerfilRequest request);
 
     List<UsuarioResponse> listarTodos();
 

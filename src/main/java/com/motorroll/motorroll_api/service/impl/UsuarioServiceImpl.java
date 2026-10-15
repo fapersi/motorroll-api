@@ -1,5 +1,6 @@
 package com.motorroll.motorroll_api.service.impl;
 
+import com.motorroll.motorroll_api.dto.auth.AuthResponse;
 import com.motorroll.motorroll_api.dto.usuario.ActualizarPerfilRequest;
 import com.motorroll.motorroll_api.dto.usuario.UsuarioResponse;
 import com.motorroll.motorroll_api.exception.RecursoDuplicadoException;
@@ -9,6 +10,7 @@ import com.motorroll.motorroll_api.mapper.UsuarioMapper;
 import com.motorroll.motorroll_api.model.Rol;
 import com.motorroll.motorroll_api.model.Usuario;
 import com.motorroll.motorroll_api.repository.UsuarioRepository;
+import com.motorroll.motorroll_api.security.JwtService;
 import com.motorroll.motorroll_api.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import java.util.List;
 public class UsuarioServiceImpl implements UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
+    private final JwtService jwtService;
 
     @Override
     @Transactional(readOnly = true)
@@ -30,7 +33,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     @Transactional
-    public UsuarioResponse actualizarPerfil(String username, ActualizarPerfilRequest request) {
+    public AuthResponse actualizarPerfil(String username, ActualizarPerfilRequest request) {
         Usuario usuario = buscarEntidadPorUsername(username);
 
         if (!usuario.getEmail().equalsIgnoreCase(request.getEmail())
@@ -42,7 +45,15 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setApellido(request.getApellido());
         usuario.setEmail(request.getEmail());
 
-        return usuarioMapper.aResponse(usuarioRepository.save(usuario));
+        Usuario guardado = usuarioRepository.save(usuario);
+
+        // Se emite un token nuevo con los datos actualizados, asi el cliente no tiene que volver a loguearse
+        return AuthResponse.builder()
+                .token(jwtService.generarToken(guardado))
+                .tipo("Bearer")
+                .expiraEnMs(jwtService.getExpiracionMs())
+                .usuario(usuarioMapper.aResponse(guardado))
+                .build();
     }
 
     @Override

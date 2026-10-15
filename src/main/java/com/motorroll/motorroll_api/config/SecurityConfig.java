@@ -50,6 +50,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/categorias/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/categorias/**").hasRole("ADMIN")
 
+                        // Gestion de usuarios: /me es para cualquier usuario logueado, el resto solo ADMIN
+                        .requestMatchers("/api/usuarios/me").authenticated()
+                        .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
+
                         .anyRequest().authenticated())
                 .exceptionHandling(errores -> errores
                         .authenticationEntryPoint((request, response, ex) ->

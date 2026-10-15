@@ -1,5 +1,6 @@
 package com.motorroll.motorroll_api.controller;
 
+import com.motorroll.motorroll_api.dto.auth.AuthResponse;
 import com.motorroll.motorroll_api.dto.usuario.ActualizarPerfilRequest;
 import com.motorroll.motorroll_api.dto.usuario.CambiarEstadoRequest;
 import com.motorroll.motorroll_api.dto.usuario.CambiarRolRequest;
@@ -26,8 +27,8 @@ public class UsuarioController {
     }
 
     @PutMapping("/me")
-    public ResponseEntity<UsuarioResponse> actualizarPerfil(Authentication authentication,
-                                                            @Valid @RequestBody ActualizarPerfilRequest request) {
+    public ResponseEntity<AuthResponse> actualizarPerfil(Authentication authentication,
+                                                         @Valid @RequestBody ActualizarPerfilRequest request) {
         return ResponseEntity.ok(usuarioService.actualizarPerfil(authentication.getName(), request));
     }
 
