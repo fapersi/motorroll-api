@@ -47,14 +47,10 @@ Usuarios de prueba: `taller.vtv` / `comprador1234`, `motorroll` / `vendedor1234`
 - **Confirmaciones:** `<Modal titulo onConfirmar onCancelar />`. Mientras carga: `<Cargando />`.
 - **Clases CSS comunes** (en `index.css`): `boton`, `boton-secundario`, `grilla`, `tarjeta`, `precio`, `precio-anterior`, `sin-stock`, `formulario`, `campo`, `campo-error`, `tabla`, `titulo-pagina`.
 
-## Cómo arrancar tu parte
-
-Cada vista y cada service tuyo tiene arriba un comentario que empieza con **BORRAR ESTE COMENTARIO ANTES DE COMMITEAR**. Ahí está qué imagen de referencia mirar, qué endpoints llamar y qué componentes conviene crear. Mientras ese comentario exista, `npm run lint` marca error: es a propósito, para que nadie lo suba.
-
 ## Reglas del grupo
 
 - Nada de `document.`, `window.`, `alert` ni `confirm`.
 - Sin comentarios en el código.
 - Ningún componente con más de 70 líneas de JavaScript.
 - Un solo GET por pantalla al montar (`useEffect` con `[]`); después de un POST, PUT, PATCH o DELETE se actualiza el estado con la respuesta, sin otro GET.
-- Antes de subir: `npm run lint` sin errores (además de los comentarios a borrar, marca `==`, `var`, `alert`, `confirm` y `window`) y `npm run build`.
+- Antes de subir: `npm run lint` sin errores (marca `==`, `var`, `alert`, `confirm`, `window` y comentarios con "borrar") y `npm run build`.
