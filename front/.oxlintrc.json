@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "oxc"],
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }],
+    "eqeqeq": "error",
+    "no-var": "error",
+    "prefer-const": "error",
+    "no-alert": "error",
+    "no-restricted-globals": ["error", "window", "confirm", "alert"],
+    "no-warning-comments": ["error", { "terms": ["borrar"], "location": "anywhere" }]
+  }
+}
