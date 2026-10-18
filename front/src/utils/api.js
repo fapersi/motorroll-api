@@ -26,7 +26,18 @@ export function pedir(ruta, opciones = {}) {
           cerrarSesion()
           throw new Error('Tu sesión venció. Volvé a ingresar.')
         }
-        throw new Error(datos.mensaje)
+        throw new Error(mensajeDeError(datos))
       })
     })
+}
+
+function mensajeDeError(datos) {
+  if (datos.errores) return Object.values(datos.errores).join('. ')
+  return datos.mensaje
+}
+
+export function urlImagen(ruta) {
+  if (!ruta) return null
+  if (ruta.startsWith('http')) return ruta
+  return `${URL_BASE}${ruta}`
 }

@@ -14,10 +14,10 @@ Usuarios de prueba: `taller.vtv` / `comprador1234`, `motorroll` / `vendedor1234`
 | Carpeta | Qué hay |
 | --- | --- |
 | `src/views/` | Una vista por URL |
-| `src/components/` | Componentes comunes (`Aviso`, `Modal`, `Cargando`, `SoloRol`); en `layout/` la navbar, el footer y la portada; y una subcarpeta por parte: `usuarios/` y `admin/` (Fátima), `catalogo/` y `vendedor/` (Thiago), `carrito/` y `ordenes/` (Tomás) |
+| `src/components/` | Componentes comunes (`Aviso`, `Modal`, `Cargando`, `SoloRol`, `Campo`); en `layout/` la navbar, el footer y la portada; y una subcarpeta por parte: `usuarios/` y `admin/` (Fátima), `catalogo/` y `vendedor/` (Thiago), `carrito/` y `ordenes/` (Tomás) |
 | `src/routes/` | `Rutas` (todas las rutas) y `RutaPrivada` |
-| `src/services/` | Las llamadas al back de cada parte (`usuariosService`, `catalogoService`, `carritoService`) |
-| `src/utils/` | `api.js` (`pedir`, `URL_BASE`) y `sesion.js` (token y usuario en localStorage) |
+| `src/services/` | Las llamadas al back de cada parte (`usuariosService`, `categoriasService`, `catalogoService`, `carritoService`) |
+| `src/utils/` | `api.js` (`pedir`, `URL_BASE`, `urlImagen`), `sesion.js` (token y usuario en localStorage) y `formato.js` (`formatearPrecio`, `formatearFecha`) |
 | `src/assets/` | Logo, banner y fotos fijas |
 
 ## Quién hace cada vista
@@ -37,7 +37,9 @@ Usuarios de prueba: `taller.vtv` / `comprador1234`, `motorroll` / `vendedor1234`
     .then((carrito) => setCarrito(carrito))
     .catch((error) => setError(error.message))
   ```
-- **Mostrar errores:** un estado `const [error, setError] = useState(null)` y en el JSX `<Aviso mensaje={error} onCerrar={() => setError(null)} />`. Si el back respondió un error, `error.message` trae su mensaje. Para un mensaje de éxito: `<Aviso mensaje="Listo" tipo="exito" />`.
+- **Mostrar errores:** un estado `const [error, setError] = useState(null)` y en el JSX `<Aviso mensaje={error} onCerrar={() => setError(null)} />`. Si el back respondió un error, `error.message` trae su mensaje; si fue un 400 de validación, trae los mensajes de cada campo (por ejemplo "El mail no tiene un formato valido"). Para un mensaje de éxito: `<Aviso mensaje="Listo" tipo="exito" />`.
+- **Campos de formulario:** `<Campo etiqueta="Mail" name="email" value={datos.email} onChange={cambiar} error={errores.email} />` dibuja la etiqueta, el input y el error. Todo lo que no es `etiqueta` ni `error` va directo al `<input>` (`type`, `name`, `value`...).
+- **Fotos y precios:** las fotos vienen del back como `/api/productos/3/imagenes/7/contenido`; `urlImagen(ruta)` le agrega `URL_BASE`. Los precios se muestran con `formatearPrecio(valor)` (US$ 48.500,00) y las fechas con `formatearFecha(fecha)`.
 - **La sesión vive en `App`:** el estado `usuario` está en `App` y baja por props.
   - `LoginView`, `RegistroView` y `PerfilView` reciben `onLogin`. Después del login, del registro o de editar el perfil se llama a `onLogin(respuesta)`: las tres respuestas traen `token` + `usuario`, así que se guarda el token nuevo y la navbar se actualiza sola.
   - `CatalogoView`, `DetalleView`, `PerfilView`, `PanelVendedorView` y `AdminView` reciben `usuario` (es `null` si no hay sesión).
@@ -45,7 +47,7 @@ Usuarios de prueba: `taller.vtv` / `comprador1234`, `motorroll` / `vendedor1234`
 - **Sesión que vence:** cuando pasan las 24 horas del token, `App` cierra la sesión y manda al login con `state.aviso`. El login lo muestra con `<Aviso mensaje={location.state?.aviso} tipo="info" />`.
 - **Volver a donde estaba:** `RutaPrivada` manda al login guardando la ruta en `state.desde`. Después del login: `navigate(location.state?.desde || '/')`.
 - **Confirmaciones:** `<Modal titulo onConfirmar onCancelar />`. Mientras carga: `<Cargando />`.
-- **Clases CSS comunes** (en `index.css`): `boton`, `boton-secundario`, `grilla`, `tarjeta`, `precio`, `precio-anterior`, `sin-stock`, `formulario`, `campo`, `campo-error`, `tabla`, `titulo-pagina`.
+- **Clases CSS comunes** (en `index.css`): `boton`, `boton-secundario`, `grilla`, `tarjeta`, `precio`, `precio-anterior`, `sin-stock`, `formulario`, `campo`, `campo-error`, `tabla`, `titulo-pagina`, `vacio`, `pestanas`, `etiqueta-descuento`.
 
 ## Reglas del grupo
 
