@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-function EditorNumero({ valor, min, max, onGuardar }) {
+function EditorNumero({ valor, onGuardar }) {
   const [numero, setNumero] = useState(valor)
   const sinCambios = numero === '' || Number(numero) === valor
 
@@ -10,8 +10,8 @@ function EditorNumero({ valor, min, max, onGuardar }) {
   }
 
   return (
-    <form className="editor-numero" onSubmit={enviar}>
-      <input type="number" min={min} max={max} value={numero} onChange={(e) => setNumero(e.target.value)} />
+    <form className="editor-numero" onSubmit={enviar} noValidate>
+      <input type="number" min="0" value={numero} onChange={(e) => setNumero(e.target.value)} />
       <button className="boton boton-secundario" disabled={sinCambios}>
         Guardar
       </button>

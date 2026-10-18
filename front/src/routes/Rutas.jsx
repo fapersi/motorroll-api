@@ -23,19 +23,16 @@ function Rutas({ usuario, onLogin }) {
 
   return (
     <Routes>
-      <Route path="/" element={<CatalogoView usuario={usuario} />} />
+      <Route path="/" element={<CatalogoView />} />
       <Route path="/producto/:id" element={<DetalleView usuario={usuario} />} />
       <Route path="/nosotros" element={<NosotrosView />} />
       <Route path="/login" element={<LoginView onLogin={onLogin} />} />
       <Route path="/registro" element={<RegistroView onLogin={onLogin} />} />
-      <Route path="/perfil" element={privada(<PerfilView usuario={usuario} onLogin={onLogin} />)} />
+      <Route path="/perfil" element={privada(<PerfilView onLogin={onLogin} />)} />
       <Route path="/carrito" element={privada(<CarritoView />, ['COMPRADOR'])} />
       <Route path="/checkout" element={privada(<CheckoutView />, ['COMPRADOR'])} />
       <Route path="/ordenes" element={privada(<OrdenesView />, ['COMPRADOR'])} />
-      <Route
-        path="/vendedor"
-        element={privada(<PanelVendedorView usuario={usuario} />, ['VENDEDOR', 'ADMIN'])}
-      />
+      <Route path="/vendedor" element={privada(<PanelVendedorView />, ['VENDEDOR', 'ADMIN'])} />
       <Route path="/admin" element={privada(<AdminView usuario={usuario} />, ['ADMIN'])} />
       <Route path="/sin-permiso" element={<SinPermisoView usuario={usuario} />} />
       <Route path="*" element={<NoEncontradoView />} />

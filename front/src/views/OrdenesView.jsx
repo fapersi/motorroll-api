@@ -6,9 +6,10 @@ import TarjetaOrden from '../components/ordenes/TarjetaOrden'
 import { misOrdenes } from '../services/carritoService'
 
 function OrdenesView() {
+  const location = useLocation()
   const [ordenes, setOrdenes] = useState(null)
   const [error, setError] = useState(null)
-  const location = useLocation()
+  const [aviso, setAviso] = useState(location.state ? location.state.aviso : null)
 
   useEffect(() => {
     misOrdenes()
@@ -21,7 +22,7 @@ function OrdenesView() {
   return (
     <section className="ordenes">
       <h1 className="titulo-pagina">Mis órdenes</h1>
-      <Aviso mensaje={location.state?.aviso} tipo="exito" />
+      <Aviso mensaje={aviso} tipo="exito" onCerrar={() => setAviso(null)} />
       {ordenes.length === 0 && (
         <p className="vacio">
           Todavía no hiciste compras. <Link to="/">Ver el catálogo</Link>

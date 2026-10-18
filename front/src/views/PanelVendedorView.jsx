@@ -4,7 +4,7 @@ import Cargando from '../components/Cargando'
 import FormProducto from '../components/vendedor/FormProducto'
 import TablaPublicaciones from '../components/vendedor/TablaPublicaciones'
 import { listarCategorias } from '../services/categoriasService'
-import { agregarFoto, cambiarDescuento, cambiarStock, crearProducto, darDeBaja, editarProducto, misPublicaciones } from '../services/catalogoService'
+import { misPublicaciones } from '../services/catalogoService'
 
 function PanelVendedorView() {
   const [publicaciones, setPublicaciones] = useState(null)
@@ -14,8 +14,12 @@ function PanelVendedorView() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    misPublicaciones().then(setPublicaciones).catch((e) => setError(e.message))
-    listarCategorias().then(setCategorias).catch((e) => setError(e.message))
+    misPublicaciones()
+      .then(setPublicaciones)
+      .catch((e) => setError(e.message))
+    listarCategorias()
+      .then(setCategorias)
+      .catch((e) => setError(e.message))
   }, [])
 
   function reemplazar(producto) {
@@ -32,16 +36,10 @@ function PanelVendedorView() {
     setEditando(null)
   }
 
-  function guardar(datos, fotos) {
-    setError(null)
-    const pedido = editando ? editarProducto(editando.id, datos, fotos) : crearProducto(datos, fotos)
-    pedido
-      .then((producto) => {
-        if (editando) reemplazar(producto)
-        else setPublicaciones([producto, ...publicaciones])
-        cerrarFormulario()
-      })
-      .catch((e) => setError(e.message))
+  function guardado(producto) {
+    if (editando) reemplazar(producto)
+    else setPublicaciones([producto, ...publicaciones])
+    cerrarFormulario()
   }
 
   if (!publicaciones) return error ? <Aviso mensaje={error} /> : <Cargando />
@@ -50,18 +48,20 @@ function PanelVendedorView() {
     <section>
       <h1 className="titulo-pagina">Mis publicaciones</h1>
       <Aviso mensaje={error} onCerrar={() => setError(null)} />
-      {(creando || editando) && (
-        <FormProducto key={editando ? editando.id : 'nuevo'} producto={editando} categorias={categorias} onEnviar={guardar} onCancelar={cerrarFormulario} />
+      {creando || editando ? (
+        <FormProducto
+          key={editando ? editando.id : 'nuevo'}
+          producto={editando}
+          categorias={categorias}
+          onGuardado={guardado}
+          onCancelar={cerrarFormulario}
+        />
+      ) : (
+        <button className="boton" onClick={() => setCreando(true)}>
+          Publicar producto
+        </button>
       )}
-      {!creando && !editando && <button className="boton" onClick={() => setCreando(true)}>Publicar producto</button>}
-      <TablaPublicaciones
-        publicaciones={publicaciones}
-        onEditar={setEditando}
-        onStock={(producto, stock) => actualizar(cambiarStock(producto, stock))}
-        onDescuento={(producto, descuento) => actualizar(cambiarDescuento(producto, descuento))}
-        onFoto={(producto, foto) => actualizar(agregarFoto(producto, foto))}
-        onBaja={(producto) => actualizar(darDeBaja(producto))}
-      />
+      <TablaPublicaciones productos={publicaciones} onEditar={setEditando} onCambio={actualizar} />
     </section>
   )
 }

@@ -6,6 +6,7 @@ import { formatearPrecio } from '../../utils/formato'
 function ResumenCarrito({ carrito, onVaciar }) {
   const [confirmando, setConfirmando] = useState(false)
   const faltaStock = carrito.items.some((item) => !item.hayStockSuficiente)
+  const productos = carrito.cantidadDeItems
 
   function vaciar() {
     setConfirmando(false)
@@ -15,7 +16,7 @@ function ResumenCarrito({ carrito, onVaciar }) {
   return (
     <aside className="tarjeta resumen-carrito">
       <h2>Resumen</h2>
-      <p>{carrito.cantidadDeItems} productos distintos</p>
+      <p>{productos === 1 ? '1 producto' : `${productos} productos distintos`}</p>
       <p className="resumen-total">
         Total <span className="precio">{formatearPrecio(carrito.total)}</span>
       </p>
@@ -33,7 +34,13 @@ function ResumenCarrito({ carrito, onVaciar }) {
       <button className="boton boton-secundario" onClick={() => setConfirmando(true)}>
         Vaciar carrito
       </button>
-      {confirmando && <Modal titulo="¿Vaciar el carrito?" onConfirmar={vaciar} onCancelar={() => setConfirmando(false)} />}
+      {confirmando && (
+        <Modal
+          titulo="¿Vaciar el carrito?"
+          onConfirmar={vaciar}
+          onCancelar={() => setConfirmando(false)}
+        />
+      )}
     </aside>
   )
 }

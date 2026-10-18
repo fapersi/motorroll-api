@@ -22,7 +22,10 @@ function CheckoutView() {
     setError(null)
     setEnviando(true)
     confirmarCompra()
-      .then((orden) => navigate('/ordenes', { state: { aviso: `¡Compra confirmada! Tu número de orden es ${orden.id}.` } }))
+      .then((orden) => {
+        const aviso = `¡Compra confirmada! Tu número de orden es ${orden.id}.`
+        navigate('/ordenes', { state: { aviso } })
+      })
       .catch((e) => {
         setError(e.message)
         setEnviando(false)
@@ -34,7 +37,7 @@ function CheckoutView() {
   if (carrito.items.length === 0) return <CarritoVacio titulo="Confirmar compra" />
 
   return (
-    <section className="checkout">
+    <section>
       <h1 className="titulo-pagina">Confirmar compra</h1>
       <Aviso mensaje={error} onCerrar={() => setError(null)} />
       <DetalleCompra items={carrito.items} total={carrito.total} />

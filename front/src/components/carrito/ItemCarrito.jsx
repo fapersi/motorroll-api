@@ -2,6 +2,12 @@ import FotoProducto from '../catalogo/FotoProducto'
 import SelectorCantidad from './SelectorCantidad'
 import { formatearPrecio } from '../../utils/formato'
 
+function avisoDeStock(disponible) {
+  if (disponible === 0) return 'Ya no hay stock'
+  if (disponible === 1) return 'Solo queda 1 unidad'
+  return `Solo quedan ${disponible} unidades`
+}
+
 function ItemCarrito({ item, onCantidad, onQuitar }) {
   return (
     <li className="tarjeta item-carrito">
@@ -13,11 +19,15 @@ function ItemCarrito({ item, onCantidad, onQuitar }) {
           {item.descuento > 0 && <span className="etiqueta-descuento">{item.descuento}% OFF</span>}
         </p>
         {!item.hayStockSuficiente && (
-          <p className="sin-stock">Solo quedan {item.stockDisponible} unidades</p>
+          <p className="sin-stock">{avisoDeStock(item.stockDisponible)}</p>
         )}
       </div>
       <div className="item-carrito-acciones">
-        <SelectorCantidad cantidad={item.cantidad} maximo={item.stockDisponible} onCambiar={onCantidad} />
+        <SelectorCantidad
+          cantidad={item.cantidad}
+          maximo={item.stockDisponible}
+          onCambiar={onCantidad}
+        />
         <p className="precio">{formatearPrecio(item.subtotal)}</p>
         <button className="boton boton-secundario" onClick={onQuitar}>
           Quitar

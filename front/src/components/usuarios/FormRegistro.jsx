@@ -1,16 +1,15 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Campo from '../Campo'
-import validarRegistro from './validarRegistro'
+import { armarRegistro, INICIAL, validarRegistro } from './datosRegistro'
 
-const INICIAL = {
-  nombre: '',
-  apellido: '',
-  email: '',
-  username: '',
-  password: '',
-  rol: 'COMPRADOR',
-}
+const CAMPOS = [
+  { name: 'nombre', etiqueta: 'Nombre' },
+  { name: 'apellido', etiqueta: 'Apellido' },
+  { name: 'email', etiqueta: 'Mail' },
+  { name: 'username', etiqueta: 'Usuario' },
+  { name: 'password', etiqueta: 'Contraseña', type: 'password' },
+]
 
 function FormRegistro({ onEnviar, cargando, children }) {
   const [datos, setDatos] = useState(INICIAL)
@@ -25,24 +24,24 @@ function FormRegistro({ onEnviar, cargando, children }) {
     const encontrados = validarRegistro(datos)
     setErrores(encontrados)
     if (Object.keys(encontrados).length > 0) return
-    onEnviar({
-      ...datos,
-      nombre: datos.nombre.trim(),
-      apellido: datos.apellido.trim(),
-      email: datos.email.trim(),
-      username: datos.username.trim(),
-    })
+    onEnviar(armarRegistro(datos))
   }
 
   return (
     <form className="formulario" onSubmit={enviar}>
       <h1 className="titulo-pagina">Crear cuenta</h1>
       {children}
-      <Campo etiqueta="Nombre" name="nombre" value={datos.nombre} onChange={cambiar} error={errores.nombre} />
-      <Campo etiqueta="Apellido" name="apellido" value={datos.apellido} onChange={cambiar} error={errores.apellido} />
-      <Campo etiqueta="Mail" name="email" value={datos.email} onChange={cambiar} error={errores.email} />
-      <Campo etiqueta="Usuario" name="username" value={datos.username} onChange={cambiar} error={errores.username} />
-      <Campo etiqueta="Contraseña" name="password" type="password" value={datos.password} onChange={cambiar} error={errores.password} />
+      {CAMPOS.map((campo) => (
+        <Campo
+          key={campo.name}
+          etiqueta={campo.etiqueta}
+          name={campo.name}
+          type={campo.type}
+          value={datos[campo.name]}
+          onChange={cambiar}
+          error={errores[campo.name]}
+        />
+      ))}
       <label className="campo">
         Quiero
         <select name="rol" value={datos.rol} onChange={cambiar}>

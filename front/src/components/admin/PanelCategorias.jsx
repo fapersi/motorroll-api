@@ -4,15 +4,12 @@ import Cargando from '../Cargando'
 import Modal from '../Modal'
 import FormCategoria from './FormCategoria'
 import TablaCategorias from './TablaCategorias'
-import { borrarCategoria, guardarCategoria, listarCategorias } from '../../services/categoriasService'
-
-function conCambios(categorias, guardada) {
-  return categorias.map((c) => {
-    if (c.id === guardada.id) return guardada
-    if (c.categoriaPadreId === guardada.id) return { ...c, categoriaPadreNombre: guardada.nombre }
-    return c
-  })
-}
+import conCambios from './conCambios'
+import {
+  borrarCategoria,
+  guardarCategoria,
+  listarCategorias,
+} from '../../services/categoriasService'
 
 function PanelCategorias() {
   const [categorias, setCategorias] = useState(null)
@@ -29,7 +26,7 @@ function PanelCategorias() {
 
   function guardar(datos) {
     setError(null)
-    guardarCategoria(editando?.id, datos)
+    guardarCategoria(editando ? editando.id : null, datos)
       .then((guardada) => {
         setCategorias(editando ? conCambios(categorias, guardada) : [...categorias, guardada])
         setEditando(null)
@@ -52,7 +49,7 @@ function PanelCategorias() {
     <>
       <Aviso mensaje={error} onCerrar={() => setError(null)} />
       <FormCategoria
-        key={`${editando?.id ?? 'nueva'}-${version}`}
+        key={editando ? `editar-${editando.id}` : `nueva-${version}`}
         categoria={editando}
         categorias={categorias}
         onEnviar={guardar}
@@ -60,7 +57,11 @@ function PanelCategorias() {
       />
       <TablaCategorias categorias={categorias} onEditar={setEditando} onBorrar={setABorrar} />
       {aBorrar && (
-        <Modal titulo={`¿Borrar la categoría ${aBorrar.nombre}?`} onConfirmar={borrar} onCancelar={() => setABorrar(null)} />
+        <Modal
+          titulo={`¿Borrar la categoría ${aBorrar.nombre}?`}
+          onConfirmar={borrar}
+          onCancelar={() => setABorrar(null)}
+        />
       )}
     </>
   )

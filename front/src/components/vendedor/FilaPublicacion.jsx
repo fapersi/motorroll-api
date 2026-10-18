@@ -1,18 +1,10 @@
-import { useState } from 'react'
-import Modal from '../Modal'
 import FotoProducto from '../catalogo/FotoProducto'
+import AccionesPublicacion from './AccionesPublicacion'
 import EditorNumero from './EditorNumero'
-import SubirFoto from './SubirFoto'
 import { formatearPrecio } from '../../utils/formato'
 
 function FilaPublicacion({ producto, onEditar, onStock, onDescuento, onFoto, onBaja }) {
-  const [confirmando, setConfirmando] = useState(false)
-  const portada = producto.imagenes[0]?.url
-
-  function confirmarBaja() {
-    setConfirmando(false)
-    onBaja(producto)
-  }
+  const portada = producto.imagenes.length > 0 ? producto.imagenes[0].url : null
 
   if (!producto.activo) {
     return (
@@ -36,25 +28,19 @@ function FilaPublicacion({ producto, onEditar, onStock, onDescuento, onFoto, onB
       </td>
       <td>{formatearPrecio(producto.precioFinal)}</td>
       <td>
-        <EditorNumero key={producto.stock} valor={producto.stock} min="0" onGuardar={(stock) => onStock(producto, stock)} />
+        <EditorNumero key={producto.stock} valor={producto.stock} onGuardar={onStock} />
       </td>
       <td>
-        <EditorNumero key={producto.descuento} valor={producto.descuento} min="0" max="100" onGuardar={(descuento) => onDescuento(producto, descuento)} />
+        <EditorNumero key={producto.descuento} valor={producto.descuento} onGuardar={onDescuento} />
       </td>
       <td>{producto.hayStock ? 'Publicada' : 'Sin stock'}</td>
       <td>
-        <div className="celda-acciones">
-          <button className="boton boton-secundario" onClick={() => onEditar(producto)}>
-            Editar
-          </button>
-          <SubirFoto onSubir={(foto) => onFoto(producto, foto)} />
-          <button className="boton" onClick={() => setConfirmando(true)}>
-            Dar de baja
-          </button>
-        </div>
-        {confirmando && (
-          <Modal titulo={`¿Dar de baja ${producto.nombre}?`} onConfirmar={confirmarBaja} onCancelar={() => setConfirmando(false)} />
-        )}
+        <AccionesPublicacion
+          nombre={producto.nombre}
+          onEditar={onEditar}
+          onFoto={onFoto}
+          onBaja={onBaja}
+        />
       </td>
     </tr>
   )

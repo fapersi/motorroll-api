@@ -10,7 +10,8 @@ function FiltroPrecio({ minimo, maximo, onAplicar }) {
 
   function enviar(e) {
     e.preventDefault()
-    if (rango.precioMin !== '' && rango.precioMax !== '' && Number(rango.precioMin) > Number(rango.precioMax)) {
+    const hayDosPrecios = rango.precioMin !== '' && rango.precioMax !== ''
+    if (hayDosPrecios && Number(rango.precioMin) > Number(rango.precioMax)) {
       setError('El mínimo no puede ser mayor que el máximo')
       return
     }
@@ -19,11 +20,25 @@ function FiltroPrecio({ minimo, maximo, onAplicar }) {
   }
 
   return (
-    <form className="filtro" onSubmit={enviar}>
+    <form className="filtro" onSubmit={enviar} noValidate>
       Precio (US$)
       <div className="filtro-precio">
-        <input type="number" name="precioMin" min="0" placeholder="Mínimo" value={rango.precioMin} onChange={cambiar} />
-        <input type="number" name="precioMax" min="0" placeholder="Máximo" value={rango.precioMax} onChange={cambiar} />
+        <input
+          type="number"
+          name="precioMin"
+          min="0"
+          placeholder="Mínimo"
+          value={rango.precioMin}
+          onChange={cambiar}
+        />
+        <input
+          type="number"
+          name="precioMax"
+          min="0"
+          placeholder="Máximo"
+          value={rango.precioMax}
+          onChange={cambiar}
+        />
         <button className="boton boton-secundario">Aplicar</button>
       </div>
       {error && <span className="campo-error">{error}</span>}

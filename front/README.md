@@ -38,11 +38,11 @@ Usuarios de prueba: `taller.vtv` / `comprador1234`, `motorroll` / `vendedor1234`
     .catch((error) => setError(error.message))
   ```
 - **Mostrar errores:** un estado `const [error, setError] = useState(null)` y en el JSX `<Aviso mensaje={error} onCerrar={() => setError(null)} />`. Si el back respondió un error, `error.message` trae su mensaje; si fue un 400 de validación, trae los mensajes de cada campo (por ejemplo "El mail no tiene un formato valido"). Para un mensaje de éxito: `<Aviso mensaje="Listo" tipo="exito" />`.
-- **Campos de formulario:** `<Campo etiqueta="Mail" name="email" value={datos.email} onChange={cambiar} error={errores.email} />` dibuja la etiqueta, el input y el error. Todo lo que no es `etiqueta` ni `error` va directo al `<input>` (`type`, `name`, `value`...).
+- **Campos de formulario:** `<Campo etiqueta="Mail" name="email" value={datos.email} onChange={cambiar} error={errores.email} />` dibuja la etiqueta, el input y el error. Si el campo no es de texto se le pasa `type` (por ejemplo `type="password"`).
 - **Fotos y precios:** las fotos vienen del back como `/api/productos/3/imagenes/7/contenido`; `urlImagen(ruta)` le agrega `URL_BASE`. Los precios se muestran con `formatearPrecio(valor)` (US$ 48.500,00) y las fechas con `formatearFecha(fecha)`.
 - **La sesión vive en `App`:** el estado `usuario` está en `App` y baja por props.
   - `LoginView`, `RegistroView` y `PerfilView` reciben `onLogin`. Después del login, del registro o de editar el perfil se llama a `onLogin(respuesta)`: las tres respuestas traen `token` + `usuario`, así que se guarda el token nuevo y la navbar se actualiza sola.
-  - `CatalogoView`, `DetalleView`, `PerfilView`, `PanelVendedorView` y `AdminView` reciben `usuario` (es `null` si no hay sesión).
+  - `DetalleView`, `AdminView` y `SinPermisoView` reciben `usuario` (es `null` si no hay sesión).
 - **Botones según el rol:** `<SoloRol usuario={usuario} roles={['COMPRADOR']}>...</SoloRol>` muestra lo de adentro solo a esos roles. Por ejemplo, el botón "Agregar al carrito" va adentro de un `SoloRol` de COMPRADOR, así el vendedor y el admin no lo ven.
 - **Sesión que vence:** cuando pasan las 24 horas del token, `App` cierra la sesión y manda al login con `state.aviso`. El login lo muestra con `<Aviso mensaje={location.state?.aviso} tipo="info" />`.
 - **Volver a donde estaba:** `RutaPrivada` manda al login guardando la ruta en `state.desde`. Después del login: `navigate(location.state?.desde || '/')`.
@@ -54,5 +54,5 @@ Usuarios de prueba: `taller.vtv` / `comprador1234`, `motorroll` / `vendedor1234`
 - Nada de `document.`, `window.`, `alert` ni `confirm`.
 - Sin comentarios en el código.
 - Ningún componente con más de 70 líneas de JavaScript.
-- Un solo GET por pantalla al montar (`useEffect` con `[]`); después de un POST, PUT, PATCH o DELETE se actualiza el estado con la respuesta, sin otro GET.
+- Cada pantalla pide lo que necesita una sola vez al montar (`useEffect` con `[]`, o con la dependencia que corresponda, como `[filtros]` o `[id]`); después de un POST, PUT, PATCH o DELETE se actualiza el estado con la respuesta, sin otro GET.
 - Antes de subir: `npm run lint` sin errores (marca `==`, `var`, `alert`, `confirm`, `window` y comentarios con "borrar") y `npm run build`.

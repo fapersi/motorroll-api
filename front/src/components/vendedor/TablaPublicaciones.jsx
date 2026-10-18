@@ -1,7 +1,13 @@
 import FilaPublicacion from './FilaPublicacion'
+import {
+  agregarFotos,
+  cambiarDescuento,
+  cambiarStock,
+  darDeBaja,
+} from '../../services/catalogoService'
 
-function TablaPublicaciones({ publicaciones, onEditar, onStock, onDescuento, onFoto, onBaja }) {
-  if (publicaciones.length === 0) {
+function TablaPublicaciones({ productos, onEditar, onCambio }) {
+  if (productos.length === 0) {
     return <p className="vacio">Todavía no publicaste productos.</p>
   }
 
@@ -18,15 +24,15 @@ function TablaPublicaciones({ publicaciones, onEditar, onStock, onDescuento, onF
         </tr>
       </thead>
       <tbody>
-        {publicaciones.map((producto) => (
+        {productos.map((producto) => (
           <FilaPublicacion
             key={producto.id}
             producto={producto}
-            onEditar={onEditar}
-            onStock={onStock}
-            onDescuento={onDescuento}
-            onFoto={onFoto}
-            onBaja={onBaja}
+            onEditar={() => onEditar(producto)}
+            onStock={(stock) => onCambio(cambiarStock(producto, stock))}
+            onDescuento={(descuento) => onCambio(cambiarDescuento(producto, descuento))}
+            onFoto={(foto) => onCambio(agregarFotos(producto, [foto]))}
+            onBaja={() => onCambio(darDeBaja(producto))}
           />
         ))}
       </tbody>

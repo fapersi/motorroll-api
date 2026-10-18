@@ -29,23 +29,19 @@ function subirFoto(productoId, foto) {
   return pedir(`/api/productos/${productoId}/imagenes`, { method: 'POST', body: formulario })
 }
 
-export function agregarFoto(producto, foto) {
-  return subirFoto(producto.id, foto).then((imagen) => ({ ...producto, imagenes: [...producto.imagenes, imagen] }))
-}
-
-function subirFotos(producto, fotos) {
-  return Promise.all(fotos.map((foto) => subirFoto(producto.id, foto))).then((nuevas) => ({
+export function agregarFotos(producto, fotos) {
+  const subidas = fotos.map((foto) => subirFoto(producto.id, foto))
+  return Promise.all(subidas).then((nuevas) => ({
     ...producto,
     imagenes: [...producto.imagenes, ...nuevas],
   }))
 }
 
-export function crearProducto(datos, fotos) {
-  return pedir('/api/productos', { method: 'POST', body: datos }).then((producto) => subirFotos(producto, fotos))
-}
-
-export function editarProducto(id, datos, fotos) {
-  return pedir(`/api/productos/${id}`, { method: 'PUT', body: datos }).then((producto) => subirFotos(producto, fotos))
+export function guardarProducto(id, datos, fotos) {
+  const pedido = id
+    ? pedir(`/api/productos/${id}`, { method: 'PUT', body: datos })
+    : pedir('/api/productos', { method: 'POST', body: datos })
+  return pedido.then((producto) => agregarFotos(producto, fotos))
 }
 
 export function cambiarStock(producto, stock) {
@@ -57,5 +53,6 @@ export function cambiarDescuento(producto, descuento) {
 }
 
 export function darDeBaja(producto) {
-  return pedir(`/api/productos/${producto.id}`, { method: 'DELETE' }).then(() => ({ ...producto, activo: false }))
+  const dadoDeBaja = { ...producto, activo: false }
+  return pedir(`/api/productos/${producto.id}`, { method: 'DELETE' }).then(() => dadoDeBaja)
 }
