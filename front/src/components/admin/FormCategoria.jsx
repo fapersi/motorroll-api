@@ -6,7 +6,7 @@ function FormCategoria({ categoria, categorias, onEnviar, onCancelar }) {
     descripcion: categoria?.descripcion ?? '',
     categoriaPadreId: categoria?.categoriaPadreId ?? '',
   })
-  const [error, setError] = useState('')
+  const [error, setError] = useState(null)
 
   function cambiar(e) {
     setDatos({ ...datos, [e.target.name]: e.target.value })
@@ -18,7 +18,7 @@ function FormCategoria({ categoria, categorias, onEnviar, onCancelar }) {
       setError('El nombre es obligatorio')
       return
     }
-    setError('')
+    setError(null)
     onEnviar({
       nombre: datos.nombre.trim(),
       descripcion: datos.descripcion.trim(),
@@ -43,7 +43,7 @@ function FormCategoria({ categoria, categorias, onEnviar, onCancelar }) {
         <select name="categoriaPadreId" value={datos.categoriaPadreId} onChange={cambiar}>
           <option value="">Ninguna</option>
           {categorias
-            .filter((c) => c.id !== categoria?.id)
+            .filter((c) => !c.categoriaPadreId && c.id !== categoria?.id)
             .map((c) => (
               <option key={c.id} value={c.id}>
                 {c.nombre}

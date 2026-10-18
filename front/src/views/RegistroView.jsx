@@ -5,12 +5,12 @@ import FormRegistro from '../components/usuarios/FormRegistro'
 import { registrar } from '../services/usuariosService'
 
 function RegistroView({ onLogin }) {
-  const [error, setError] = useState('')
+  const [error, setError] = useState(null)
   const [cargando, setCargando] = useState(false)
   const navigate = useNavigate()
 
   function crearCuenta(datos) {
-    setError('')
+    setError(null)
     setCargando(true)
     registrar(datos)
       .then((respuesta) => {
@@ -25,7 +25,7 @@ function RegistroView({ onLogin }) {
 
   return (
     <FormRegistro onEnviar={crearCuenta} cargando={cargando}>
-      <Aviso mensaje={error} onCerrar={() => setError('')} />
+      <Aviso mensaje={error} onCerrar={() => setError(null)} />
     </FormRegistro>
   )
 }

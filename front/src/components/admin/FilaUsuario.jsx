@@ -23,7 +23,11 @@ function FilaUsuario({ usuario, esYo, onRol, onEstado, onEliminar }) {
         >
           {usuario.activo ? 'Deshabilitar' : 'Habilitar'}
         </button>{' '}
-        <button className="boton" disabled={esYo} onClick={() => onEliminar(usuario)}>
+        <button
+          className="boton"
+          disabled={esYo || usuario.rol === 'ADMIN'}
+          onClick={() => onEliminar(usuario)}
+        >
           Eliminar
         </button>
       </td>

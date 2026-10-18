@@ -8,18 +8,20 @@ function AdminView({ usuario }) {
   return (
     <section>
       <h1 className="titulo-pagina">Panel de administración</h1>
-      <button
-        className={pestana === 'usuarios' ? 'boton' : 'boton boton-secundario'}
-        onClick={() => setPestana('usuarios')}
-      >
-        Usuarios
-      </button>{' '}
-      <button
-        className={pestana === 'categorias' ? 'boton' : 'boton boton-secundario'}
-        onClick={() => setPestana('categorias')}
-      >
-        Categorías
-      </button>
+      <div className="pestanas">
+        <button
+          className={pestana === 'usuarios' ? 'boton' : 'boton boton-secundario'}
+          onClick={() => setPestana('usuarios')}
+        >
+          Usuarios
+        </button>
+        <button
+          className={pestana === 'categorias' ? 'boton' : 'boton boton-secundario'}
+          onClick={() => setPestana('categorias')}
+        >
+          Categorías
+        </button>
+      </div>
       <div hidden={pestana !== 'usuarios'}>
         <PanelUsuarios miId={usuario.id} />
       </div>

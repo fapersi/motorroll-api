@@ -5,13 +5,13 @@ import FormLogin from '../components/usuarios/FormLogin'
 import { login } from '../services/usuariosService'
 
 function LoginView({ onLogin }) {
-  const [error, setError] = useState('')
+  const [error, setError] = useState(null)
   const [cargando, setCargando] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
 
   function ingresar(datos) {
-    setError('')
+    setError(null)
     setCargando(true)
     login(datos)
       .then((respuesta) => {
@@ -27,7 +27,7 @@ function LoginView({ onLogin }) {
   return (
     <FormLogin onEnviar={ingresar} cargando={cargando}>
       <Aviso mensaje={location.state?.aviso} tipo="info" />
-      <Aviso mensaje={error} onCerrar={() => setError('')} />
+      <Aviso mensaje={error} onCerrar={() => setError(null)} />
     </FormLogin>
   )
 }

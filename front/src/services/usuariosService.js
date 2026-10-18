@@ -31,19 +31,3 @@ export function cambiarEstado(id, activo) {
 export function eliminarUsuario(id) {
   return pedir(`/api/usuarios/${id}`, { method: 'DELETE' })
 }
-
-export function listarCategorias() {
-  return pedir('/api/categorias')
-}
-
-export function crearCategoria(datos) {
-  return pedir('/api/categorias', { method: 'POST', body: datos })
-}
-
-export function editarCategoria(id, datos) {
-  return pedir(`/api/categorias/${id}`, { method: 'PUT', body: datos })
-}
-
-export function borrarCategoria(id) {
-  return pedir(`/api/categorias/${id}`, { method: 'DELETE' })
-}

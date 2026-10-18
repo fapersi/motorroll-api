@@ -4,16 +4,19 @@ import Cargando from '../Cargando'
 import Modal from '../Modal'
 import FormCategoria from './FormCategoria'
 import TablaCategorias from './TablaCategorias'
-import {
-  borrarCategoria,
-  crearCategoria,
-  editarCategoria,
-  listarCategorias,
-} from '../../services/usuariosService'
+import { borrarCategoria, guardarCategoria, listarCategorias } from '../../services/categoriasService'
+
+function conCambios(categorias, guardada) {
+  return categorias.map((c) => {
+    if (c.id === guardada.id) return guardada
+    if (c.categoriaPadreId === guardada.id) return { ...c, categoriaPadreNombre: guardada.nombre }
+    return c
+  })
+}
 
 function PanelCategorias() {
   const [categorias, setCategorias] = useState(null)
-  const [error, setError] = useState('')
+  const [error, setError] = useState(null)
   const [editando, setEditando] = useState(null)
   const [aBorrar, setABorrar] = useState(null)
   const [version, setVersion] = useState(0)
@@ -24,36 +27,19 @@ function PanelCategorias() {
       .catch((e) => setError(e.message))
   }, [])
 
-  function terminar() {
-    setEditando(null)
-    setVersion(version + 1)
-  }
-
   function guardar(datos) {
-    setError('')
-    if (editando) {
-      editarCategoria(editando.id, datos)
-        .then((nueva) => {
-          setCategorias(categorias.map((c) => {
-            if (c.id === nueva.id) return nueva
-            if (c.categoriaPadreId === nueva.id) return { ...c, categoriaPadreNombre: nueva.nombre }
-            return c
-          }))
-          terminar()
-        })
-        .catch((e) => setError(e.message))
-      return
-    }
-    crearCategoria(datos)
-      .then((nueva) => {
-        setCategorias([...categorias, nueva])
-        terminar()
+    setError(null)
+    guardarCategoria(editando?.id, datos)
+      .then((guardada) => {
+        setCategorias(editando ? conCambios(categorias, guardada) : [...categorias, guardada])
+        setEditando(null)
+        setVersion(version + 1)
       })
       .catch((e) => setError(e.message))
   }
 
   function borrar() {
-    setError('')
+    setError(null)
     borrarCategoria(aBorrar.id)
       .then(() => setCategorias(categorias.filter((c) => c.id !== aBorrar.id)))
       .catch((e) => setError(e.message))
@@ -64,7 +50,7 @@ function PanelCategorias() {
 
   return (
     <>
-      <Aviso mensaje={error} onCerrar={() => setError('')} />
+      <Aviso mensaje={error} onCerrar={() => setError(null)} />
       <FormCategoria
         key={`${editando?.id ?? 'nueva'}-${version}`}
         categoria={editando}
@@ -74,11 +60,7 @@ function PanelCategorias() {
       />
       <TablaCategorias categorias={categorias} onEditar={setEditando} onBorrar={setABorrar} />
       {aBorrar && (
-        <Modal
-          titulo={`¿Borrar la categoría ${aBorrar.nombre}?`}
-          onConfirmar={borrar}
-          onCancelar={() => setABorrar(null)}
-        />
+        <Modal titulo={`¿Borrar la categoría ${aBorrar.nombre}?`} onConfirmar={borrar} onCancelar={() => setABorrar(null)} />
       )}
     </>
   )

@@ -6,8 +6,8 @@ import { actualizarPerfil, obtenerPerfil } from '../services/usuariosService'
 
 function PerfilView({ onLogin }) {
   const [perfil, setPerfil] = useState(null)
-  const [error, setError] = useState('')
-  const [exito, setExito] = useState('')
+  const [error, setError] = useState(null)
+  const [exito, setExito] = useState(null)
   const [cargando, setCargando] = useState(false)
 
   useEffect(() => {
@@ -17,8 +17,8 @@ function PerfilView({ onLogin }) {
   }, [])
 
   function guardar(datos) {
-    setError('')
-    setExito('')
+    setError(null)
+    setExito(null)
     setCargando(true)
     actualizarPerfil(datos)
       .then((respuesta) => {
@@ -34,8 +34,8 @@ function PerfilView({ onLogin }) {
 
   return (
     <FormPerfil usuario={perfil} onEnviar={guardar} cargando={cargando}>
-      <Aviso mensaje={exito} tipo="exito" onCerrar={() => setExito('')} />
-      <Aviso mensaje={error} onCerrar={() => setError('')} />
+      <Aviso mensaje={exito} tipo="exito" onCerrar={() => setExito(null)} />
+      <Aviso mensaje={error} onCerrar={() => setError(null)} />
     </FormPerfil>
   )
 }

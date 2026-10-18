@@ -12,7 +12,7 @@ import {
 
 function PanelUsuarios({ miId }) {
   const [usuarios, setUsuarios] = useState(null)
-  const [error, setError] = useState('')
+  const [error, setError] = useState(null)
   const [aEliminar, setAEliminar] = useState(null)
 
   useEffect(() => {
@@ -22,14 +22,14 @@ function PanelUsuarios({ miId }) {
   }, [])
 
   function modificar(promesa) {
-    setError('')
+    setError(null)
     promesa
       .then((nuevo) => setUsuarios(usuarios.map((u) => (u.id === nuevo.id ? nuevo : u))))
       .catch((e) => setError(e.message))
   }
 
   function eliminar() {
-    setError('')
+    setError(null)
     eliminarUsuario(aEliminar.id)
       .then(() => setUsuarios(usuarios.filter((u) => u.id !== aEliminar.id)))
       .catch((e) => setError(e.message))
@@ -38,7 +38,7 @@ function PanelUsuarios({ miId }) {
 
   return (
     <>
-      <Aviso mensaje={error} onCerrar={() => setError('')} />
+      <Aviso mensaje={error} onCerrar={() => setError(null)} />
       {!usuarios && !error && <Cargando />}
       {usuarios && (
         <TablaUsuarios
