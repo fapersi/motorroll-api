@@ -2,6 +2,7 @@ package com.motorroll.motorroll_api.exception;
 
 import com.motorroll.motorroll_api.dto.common.ApiError;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -104,6 +105,14 @@ public class ManejadorGlobalDeExcepciones {
                                                                   HttpServletRequest request) {
         return armarRespuesta(HttpStatus.PAYLOAD_TOO_LARGE,
                 "El archivo es demasiado grande. El maximo permitido es 5 MB", request);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> manejarDatosRelacionados(DataIntegrityViolationException ex,
+                                                             HttpServletRequest request) {
+        return armarRespuesta(HttpStatus.CONFLICT,
+                "No se puede eliminar porque tiene datos relacionados (productos, carrito u ordenes). "
+                        + "Si es un usuario, se puede deshabilitar", request);
     }
 
     @ExceptionHandler(Exception.class)
