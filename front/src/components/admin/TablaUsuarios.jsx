@@ -2,14 +2,14 @@ import FilaUsuario from './FilaUsuario'
 
 function TablaUsuarios({ usuarios, miId, onRol, onEstado, onEliminar }) {
   return (
-    <table className="tabla">
+    <table className="tabla tabla-admin">
       <thead>
         <tr>
           <th>Usuario</th>
           <th>Mail</th>
           <th>Rol</th>
-          <th>Estado</th>
-          <th>Acciones</th>
+          <th className="celda-centrada">Estado</th>
+          <th className="celda-centrada">Acciones</th>
         </tr>
       </thead>
       <tbody>

@@ -1,9 +1,13 @@
 import { useState } from 'react'
+import { useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
 import Modal from '../Modal'
 import SoloRol from '../SoloRol'
+import BotonCarrito from './BotonCarrito'
+import { cerrarSesion } from '../../redux/usuarioSlice'
 
-function MenuUsuario({ usuario, onSalir }) {
+function MenuUsuario({ usuario }) {
+  const dispatch = useDispatch()
   const [confirmando, setConfirmando] = useState(false)
   const navigate = useNavigate()
 
@@ -22,7 +26,7 @@ function MenuUsuario({ usuario, onSalir }) {
 
   const salir = () => {
     setConfirmando(false)
-    onSalir()
+    dispatch(cerrarSesion())
     navigate('/')
   }
 
@@ -31,15 +35,17 @@ function MenuUsuario({ usuario, onSalir }) {
       <Link to="/perfil">Hola, {usuario.nombre}</Link>
       <span className="etiqueta-rol">{usuario.rol}</span>
       <SoloRol usuario={usuario} roles={['COMPRADOR']}>
-        <Link to="/carrito" className="boton">
-          🛒 Carrito
-        </Link>
+        <BotonCarrito />
       </SoloRol>
       <button className="boton boton-secundario" onClick={() => setConfirmando(true)}>
         Salir
       </button>
       {confirmando && (
-        <Modal titulo="¿Querés cerrar sesión?" onConfirmar={salir} onCancelar={() => setConfirmando(false)} />
+        <Modal
+          titulo="¿Querés cerrar sesión?"
+          onConfirmar={salir}
+          onCancelar={() => setConfirmando(false)}
+        />
       )}
     </div>
   )

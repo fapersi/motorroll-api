@@ -28,8 +28,7 @@ function FormRegistro({ onEnviar, cargando, children }) {
   }
 
   return (
-    <form className="formulario" onSubmit={enviar}>
-      <h1 className="titulo-pagina">Crear cuenta</h1>
+    <form className="form-acceso" onSubmit={enviar}>
       {children}
       {CAMPOS.map((campo) => (
         <Campo

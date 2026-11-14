@@ -2,6 +2,7 @@ package com.motorroll.motorroll_api.service.impl;
 
 import com.motorroll.motorroll_api.dto.carrito.AgregarItemRequest;
 import com.motorroll.motorroll_api.dto.carrito.CarritoResponse;
+import com.motorroll.motorroll_api.dto.carrito.CheckoutRequest;
 import com.motorroll.motorroll_api.dto.orden.OrdenResponse;
 import com.motorroll.motorroll_api.exception.OperacionNoPermitidaException;
 import com.motorroll.motorroll_api.exception.RecursoNoEncontradoException;
@@ -14,7 +15,9 @@ import com.motorroll.motorroll_api.model.EstadoOrden;
 import com.motorroll.motorroll_api.model.ItemCarrito;
 import com.motorroll.motorroll_api.model.ItemOrden;
 import com.motorroll.motorroll_api.model.Orden;
+import com.motorroll.motorroll_api.model.MetodoPago;
 import com.motorroll.motorroll_api.model.Producto;
+import com.motorroll.motorroll_api.model.ProgramaDePuntos;
 import com.motorroll.motorroll_api.model.Usuario;
 import com.motorroll.motorroll_api.repository.CarritoRepository;
 import com.motorroll.motorroll_api.repository.OrdenRepository;
@@ -110,12 +113,17 @@ public class CarritoServiceImpl implements CarritoService {
 
     @Override
     @Transactional
-    public OrdenResponse checkout(String username) {
+    public OrdenResponse checkout(String username, CheckoutRequest request) {
         Usuario comprador = usuarioService.buscarEntidadPorUsername(username);
         Carrito carrito = obtenerOCrearCarrito(username);
+        boolean usarPuntos = request != null && request.isUsarPuntos();
 
         if (carrito.getItems().isEmpty()) {
             throw new ReglaDeNegocioException("El carrito esta vacio, no hay nada para comprar");
+        }
+        if (usarPuntos && comprador.puntosDisponibles() < ProgramaDePuntos.PUNTOS_PARA_CANJE) {
+            throw new ReglaDeNegocioException("Necesitas " + ProgramaDePuntos.PUNTOS_PARA_CANJE
+                    + " puntos para el descuento y tenes " + comprador.puntosDisponibles());
         }
 
         Orden orden = Orden.builder()
@@ -154,7 +162,19 @@ public class CarritoServiceImpl implements CarritoService {
             productosAActualizar.add(producto);
         }
 
-        orden.setTotal(total);
+        BigDecimal descuentoPorPuntos = usarPuntos ? ProgramaDePuntos.descuentoDelCanje(total) : BigDecimal.ZERO;
+        BigDecimal totalAPagar = total.subtract(descuentoPorPuntos);
+        int puntosUsados = usarPuntos ? ProgramaDePuntos.PUNTOS_PARA_CANJE : 0;
+        int puntosGanados = ProgramaDePuntos.puntosGanados(totalAPagar);
+
+        orden.setSubtotal(total);
+        orden.setDescuentoPorPuntos(descuentoPorPuntos);
+        orden.setTotal(totalAPagar);
+        orden.setPuntosUsados(puntosUsados);
+        orden.setPuntosGanados(puntosGanados);
+        aplicarPago(orden, request);
+        comprador.setPuntos(comprador.puntosDisponibles() - puntosUsados + puntosGanados);
+
         ordenRepository.save(orden);
         productoRepository.saveAll(productosAActualizar);
 
@@ -162,6 +182,16 @@ public class CarritoServiceImpl implements CarritoService {
         carritoRepository.save(carrito);
 
         return ordenMapper.aResponse(orden);
+    }
+
+    private void aplicarPago(Orden orden, CheckoutRequest request) {
+        if (request == null) {
+            return;
+        }
+        orden.setMetodoPago(request.getMetodoPago());
+        orden.setDireccionEnvio(request.getDireccionEnvio().trim());
+        boolean esCredito = request.getMetodoPago() == MetodoPago.TARJETA_CREDITO;
+        orden.setCuotas(esCredito && request.getCuotas() != null ? request.getCuotas() : 1);
     }
 
     private Carrito obtenerOCrearCarrito(String username) {

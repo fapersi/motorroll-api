@@ -1,53 +1,66 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
 import Aviso from '../components/Aviso'
 import Cargando from '../components/Cargando'
 import CarritoVacio from '../components/carrito/CarritoVacio'
 import DetalleCompra from '../components/carrito/DetalleCompra'
-import { confirmarCompra, verCarrito } from '../services/carritoService'
+import CanjePuntos from '../components/pago/CanjePuntos'
+import DireccionEnvio from '../components/pago/DireccionEnvio'
+import ElegirMetodo from '../components/pago/ElegirMetodo'
+import ResumenPago from '../components/pago/ResumenPago'
+import { useEleccionPago } from '../components/pago/useEleccionPago'
+import { fetchCarrito, limpiarError } from '../redux/carritoSlice'
+import { fetchPerfil } from '../redux/usuarioSlice'
 
 function CheckoutView() {
-  const [carrito, setCarrito] = useState(null)
-  const [error, setError] = useState(null)
-  const [enviando, setEnviando] = useState(false)
+  const dispatch = useDispatch()
+  const carrito = useSelector((state) => state.carrito)
+  const sesion = useSelector((state) => state.usuario.sesion)
+  const eleccion = useEleccionPago(carrito.total)
   const navigate = useNavigate()
 
   useEffect(() => {
-    verCarrito()
-      .then(setCarrito)
-      .catch((e) => setError(e.message))
-  }, [])
+    dispatch(fetchPerfil())
+    if (!carrito.cargado) dispatch(fetchCarrito())
+  }, [dispatch, carrito.cargado])
 
-  function confirmar() {
-    setError(null)
-    setEnviando(true)
-    confirmarCompra()
-      .then((orden) => {
-        const aviso = `¡Compra confirmada! Tu número de orden es ${orden.id}.`
-        navigate('/ordenes', { state: { aviso } })
-      })
-      .catch((e) => {
-        setError(e.message)
-        setEnviando(false)
-      })
-  }
-
-  if (!carrito) return error ? <Aviso mensaje={error} /> : <Cargando />
-
+  if (!carrito.cargado) return carrito.error ? <Aviso mensaje={carrito.error} /> : <Cargando />
   if (carrito.items.length === 0) return <CarritoVacio titulo="Confirmar compra" />
 
   return (
     <section>
       <h1 className="titulo-pagina">Confirmar compra</h1>
-      <Aviso mensaje={error} onCerrar={() => setError(null)} />
-      <DetalleCompra items={carrito.items} total={carrito.total} />
-      <div className="checkout-botones">
-        <Link to="/carrito" className="boton boton-secundario">
-          Volver al carrito
-        </Link>
-        <button className="boton" disabled={enviando} onClick={confirmar}>
-          {enviando ? 'Confirmando...' : 'Confirmar compra'}
-        </button>
+      <Aviso mensaje={carrito.error} onCerrar={() => dispatch(limpiarError())} />
+      <div className="carrito">
+        <div className="checkout-columna">
+          <DetalleCompra items={carrito.items} total={carrito.total} />
+          <DireccionEnvio direccion={eleccion.direccion} onCambiar={eleccion.setDireccion} />
+          <ElegirMetodo
+            metodo={eleccion.metodo}
+            cuotas={eleccion.cuotas}
+            aPagar={eleccion.pago.aPagar}
+            onMetodo={eleccion.setMetodo}
+            onCuotas={eleccion.setCuotas}
+          />
+          <CanjePuntos
+            puntos={sesion ? sesion.puntos : 0}
+            usarPuntos={eleccion.usarPuntos}
+            onCambiar={eleccion.setUsarPuntos}
+          />
+        </div>
+        <ResumenPago pago={eleccion.pago} cuotas={eleccion.cuotasFinales}>
+          <button
+            className="boton"
+            disabled={eleccion.incompleto}
+            onClick={() => navigate('/pago', { state: eleccion.datosDelPago })}
+          >
+            {eleccion.textoDelBoton}
+          </button>
+          <Link to="/carrito" className="boton boton-secundario">
+            Volver al carrito
+          </Link>
+        </ResumenPago>
       </div>
     </section>
   )

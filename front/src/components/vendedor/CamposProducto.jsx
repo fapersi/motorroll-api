@@ -3,9 +3,9 @@ import OpcionesCategoria from '../catalogo/OpcionesCategoria'
 
 const CAMPOS = [
   { name: 'nombre', etiqueta: 'Nombre' },
-  { name: 'precio', etiqueta: 'Precio (US$)', type: 'number' },
-  { name: 'stock', etiqueta: 'Stock', type: 'number' },
-  { name: 'descuento', etiqueta: 'Descuento (%)', type: 'number' },
+  { name: 'precio', etiqueta: 'Precio (US$)', type: 'number', min: 0 },
+  { name: 'stock', etiqueta: 'Stock', type: 'number', min: 0 },
+  { name: 'descuento', etiqueta: 'Descuento (%)', type: 'number', min: 0 },
   { name: 'marca', etiqueta: 'Marca' },
 ]
 
@@ -18,6 +18,7 @@ function CamposProducto({ datos, errores, categorias, onCambiar }) {
           etiqueta={campo.etiqueta}
           name={campo.name}
           type={campo.type}
+          min={campo.min}
           value={datos[campo.name]}
           onChange={onCambiar}
           error={errores[campo.name]}

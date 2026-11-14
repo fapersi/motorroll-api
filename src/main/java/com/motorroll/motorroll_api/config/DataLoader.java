@@ -4,10 +4,12 @@ import com.motorroll.motorroll_api.model.Categoria;
 import com.motorroll.motorroll_api.model.FichaTecnica;
 import com.motorroll.motorroll_api.model.ImagenProducto;
 import com.motorroll.motorroll_api.model.Producto;
+import com.motorroll.motorroll_api.model.Resena;
 import com.motorroll.motorroll_api.model.Rol;
 import com.motorroll.motorroll_api.model.Usuario;
 import com.motorroll.motorroll_api.repository.CategoriaRepository;
 import com.motorroll.motorroll_api.repository.ProductoRepository;
+import com.motorroll.motorroll_api.repository.ResenaRepository;
 import com.motorroll.motorroll_api.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,7 @@ public class DataLoader implements CommandLineRunner {
     private final UsuarioRepository usuarioRepository;
     private final CategoriaRepository categoriaRepository;
     private final ProductoRepository productoRepository;
+    private final ResenaRepository resenaRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -55,10 +58,10 @@ public class DataLoader implements CommandLineRunner {
         Usuario dynotech = crearUsuario("dynotech", "info@dynotech.com.ar", "vendedor1234",
                 "Dyno", "Tech", Rol.VENDEDOR);
 
-        crearUsuario("taller.vtv", "compras@vtvcentro.com.ar", "comprador1234",
+        Usuario taller = crearUsuario("taller.vtv", "compras@vtvcentro.com.ar", "comprador1234",
                 "Martin", "Alvarez", Rol.COMPRADOR);
 
-        crearUsuario("tuning.rp", "info@rpperformance.com.ar", "comprador1234",
+        Usuario tuning = crearUsuario("tuning.rp", "info@rpperformance.com.ar", "comprador1234",
                 "Rocio", "Paz", Rol.COMPRADOR);
 
         Categoria bancos = crearCategoria("Bancos de potencia",
@@ -185,6 +188,20 @@ public class DataLoader implements CommandLineRunner {
                 new BigDecimal("5400.00"), 4, "Motorroll", 0, true,
                 List.of("instalacion-a.jpg"));
 
+        taller.setPuntos(650);
+        usuarioRepository.save(taller);
+
+        crearResena(inercial1, taller, 5,
+                "Lo usamos todos los dias en la VTV. Las curvas salen al toque y la calibracion se mantiene.");
+        crearResena(inercial1, tuning, 4,
+                "Muy buen banco para el precio. El software podria ser mas intuitivo, pero mide bien.");
+        crearResena(inercial2, tuning, 5,
+                "Ideal para tuning: comparo antes y despues del remapeo en dos minutos.");
+        crearResena(motos1, taller, 4,
+                "Probamos motos y cuatriciclos sin problema. La sujecion frontal es firme.");
+        crearResena(mixto1, tuning, 3,
+                "Es una bestia, pero necesitas una sala grande y bien climatizada.");
+
         log.info("Datos de ejemplo cargados: {} usuarios, {} categorias, {} productos.",
                 usuarioRepository.count(), categoriaRepository.count(), productoRepository.count());
         log.info("Usuario administrador: {} / admin1234", admin.getUsername());
@@ -200,6 +217,15 @@ public class DataLoader implements CommandLineRunner {
                 .apellido(apellido)
                 .rol(rol)
                 .activo(true)
+                .build());
+    }
+
+    private void crearResena(Producto producto, Usuario autor, int estrellas, String comentario) {
+        resenaRepository.save(Resena.builder()
+                .producto(producto)
+                .autor(autor)
+                .estrellas(estrellas)
+                .comentario(comentario)
                 .build());
     }
 

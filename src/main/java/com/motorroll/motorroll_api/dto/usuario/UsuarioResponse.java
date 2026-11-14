@@ -21,4 +21,5 @@ public class UsuarioResponse {
     private Rol rol;
     private LocalDateTime fechaAlta;
     private boolean activo;
+    private int puntos;
 }

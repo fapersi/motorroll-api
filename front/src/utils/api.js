@@ -1,37 +1,29 @@
-import { obtenerToken, cerrarSesion } from './sesion'
+import axios from 'axios'
+import { borrarSesion, obtenerToken } from './sesion'
 
 export const URL_BASE = 'http://localhost:8080'
+export const SESION_VENCIDA = 'Tu sesión venció. Volvé a ingresar.'
 
-export function pedir(ruta, opciones = {}) {
+export const api = axios.create({ baseURL: URL_BASE })
+
+api.interceptors.request.use((config) => {
   const token = obtenerToken()
-  const esArchivo = opciones.body instanceof FormData
-  const headers = {}
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
 
-  if (token) headers.Authorization = `Bearer ${token}`
-  if (opciones.body && !esArchivo) headers['Content-Type'] = 'application/json'
+api.interceptors.response.use(
+  (respuesta) => respuesta,
+  (error) => Promise.reject(new Error(mensajeDeError(error))),
+)
 
-  return fetch(`${URL_BASE}${ruta}`, {
-    method: opciones.method || 'GET',
-    headers,
-    body: esArchivo ? opciones.body : JSON.stringify(opciones.body),
-  })
-    .catch(() => {
-      throw new Error('No se pudo conectar con el servidor.')
-    })
-    .then((respuesta) => {
-      if (respuesta.status === 204) return null
-      return respuesta.json().then((datos) => {
-        if (respuesta.ok) return datos
-        if (respuesta.status === 401 && token) {
-          cerrarSesion()
-          throw new Error('Tu sesión venció. Volvé a ingresar.')
-        }
-        throw new Error(mensajeDeError(datos))
-      })
-    })
-}
-
-function mensajeDeError(datos) {
+function mensajeDeError(error) {
+  if (!error.response) return 'No se pudo conectar con el servidor.'
+  if (error.response.status === 401 && obtenerToken()) {
+    borrarSesion()
+    return SESION_VENCIDA
+  }
+  const datos = error.response.data
   if (datos.errores) return Object.values(datos.errores).join('. ')
   return datos.mensaje
 }

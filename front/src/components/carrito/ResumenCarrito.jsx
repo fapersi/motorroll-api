@@ -6,7 +6,7 @@ import { formatearPrecio } from '../../utils/formato'
 function ResumenCarrito({ carrito, onVaciar }) {
   const [confirmando, setConfirmando] = useState(false)
   const faltaStock = carrito.items.some((item) => !item.hayStockSuficiente)
-  const productos = carrito.cantidadDeItems
+  const productos = carrito.items.length
 
   function vaciar() {
     setConfirmando(false)

@@ -1,19 +1,21 @@
 import { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Link, useLocation } from 'react-router-dom'
 import Aviso from '../Aviso'
-import SoloRol from '../SoloRol'
-import { agregarAlCarrito } from '../../services/catalogoService'
+import { addItem, limpiarError } from '../../redux/carritoSlice'
 
-function AgregarAlCarrito({ producto, usuario }) {
+function AgregarAlCarrito({ producto }) {
+  const dispatch = useDispatch()
+  const usuario = useSelector((state) => state.usuario.sesion)
+  const error = useSelector((state) => state.carrito.error)
   const [agregado, setAgregado] = useState(null)
-  const [error, setError] = useState(null)
   const location = useLocation()
 
   function agregar() {
-    setError(null)
-    agregarAlCarrito(producto.id)
-      .then(() => setAgregado('Agregado al carrito'))
-      .catch((e) => setError(e.message))
+    setAgregado(null)
+    dispatch(addItem(producto.id)).then((accion) => {
+      if (!accion.error) setAgregado('Agregado al carrito')
+    })
   }
 
   if (!producto.hayStock) {
@@ -32,8 +34,10 @@ function AgregarAlCarrito({ producto, usuario }) {
     )
   }
 
+  if (usuario.rol !== 'COMPRADOR') return null
+
   return (
-    <SoloRol usuario={usuario} roles={['COMPRADOR']}>
+    <>
       <div className="agregar-carrito">
         <button className="boton" onClick={agregar}>
           Agregar al carrito
@@ -43,8 +47,8 @@ function AgregarAlCarrito({ producto, usuario }) {
         </Link>
       </div>
       <Aviso mensaje={agregado} tipo="exito" onCerrar={() => setAgregado(null)} />
-      <Aviso mensaje={error} onCerrar={() => setError(null)} />
-    </SoloRol>
+      <Aviso mensaje={error} onCerrar={() => dispatch(limpiarError())} />
+    </>
   )
 }
 

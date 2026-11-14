@@ -1,33 +1,28 @@
 import { useState } from 'react'
-import Aviso from '../Aviso'
+import { useDispatch, useSelector } from 'react-redux'
 import CamposProducto from './CamposProducto'
 import { armarProducto, datosIniciales, TIPOS_DE_FOTO, validarProducto } from './datosProducto'
-import { guardarProducto } from '../../services/catalogoService'
+import { createProducto, updateProducto } from '../../redux/productoSlice'
 
-function FormProducto({ producto, categorias, onGuardado, onCancelar }) {
+function FormProducto({ producto, categorias, onCerrar }) {
+  const dispatch = useDispatch()
+  const guardando = useSelector((state) => state.productos.loading)
   const [datos, setDatos] = useState(datosIniciales(producto))
   const [fotos, setFotos] = useState([])
   const [errores, setErrores] = useState({})
-  const [guardando, setGuardando] = useState(false)
-  const [error, setError] = useState(null)
 
   function cambiar(e) {
     setDatos({ ...datos, [e.target.name]: e.target.value })
   }
 
-  function elegirFotos(e) {
-    setFotos(Array.from(e.target.files))
-  }
-
   function guardar() {
-    setError(null)
-    setGuardando(true)
-    guardarProducto(producto ? producto.id : null, armarProducto(datos), fotos)
-      .then(onGuardado)
-      .catch((e) => {
-        setError(e.message)
-        setGuardando(false)
-      })
+    const cambios = { ...armarProducto(datos), fotos }
+    const accion = producto
+      ? updateProducto({ id: producto.id, ...cambios })
+      : createProducto(cambios)
+    dispatch(accion).then((resultado) => {
+      if (!resultado.error) onCerrar()
+    })
   }
 
   function enviar(e) {
@@ -43,15 +38,19 @@ function FormProducto({ producto, categorias, onGuardado, onCancelar }) {
       <CamposProducto datos={datos} errores={errores} categorias={categorias} onCambiar={cambiar} />
       <label className="campo">
         {producto ? 'Agregar fotos' : 'Fotos'}
-        <input type="file" accept={TIPOS_DE_FOTO.join(',')} multiple onChange={elegirFotos} />
+        <input
+          type="file"
+          accept={TIPOS_DE_FOTO.join(',')}
+          multiple
+          onChange={(e) => setFotos(Array.from(e.target.files))}
+        />
         {errores.fotos && <span className="campo-error">{errores.fotos}</span>}
       </label>
-      <Aviso mensaje={error} onCerrar={() => setError(null)} />
       <div className="formulario-botones">
         <button className="boton" disabled={guardando}>
           {producto ? 'Guardar cambios' : 'Publicar'}
         </button>
-        <button type="button" className="boton boton-secundario" onClick={onCancelar}>
+        <button type="button" className="boton boton-secundario" onClick={onCerrar}>
           Cancelar
         </button>
       </div>

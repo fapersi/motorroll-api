@@ -32,6 +32,8 @@ public class ProductoMapper {
                 .categoriaId(producto.getCategoria() != null ? producto.getCategoria().getId() : null)
                 .categoriaNombre(producto.getCategoria() != null ? producto.getCategoria().getNombre() : null)
                 .vendedor(producto.getVendedor() != null ? producto.getVendedor().getUsername() : null)
+                .calificacion(producto.calcularCalificacion())
+                .cantidadResenas(producto.contarResenas())
                 .build();
     }
 
@@ -59,6 +61,8 @@ public class ProductoMapper {
                 .vendedor(producto.getVendedor() != null ? producto.getVendedor().getUsername() : null)
                 .imagenes(aImagenes(producto.getImagenes()))
                 .fichaTecnica(aFichaTecnica(producto.getFichaTecnica()))
+                .calificacion(producto.calcularCalificacion())
+                .cantidadResenas(producto.contarResenas())
                 .build();
     }
 

@@ -50,6 +50,10 @@ public class Usuario {
     private boolean activo = true;
 
     @Builder.Default
+    @Column(name = "puntos", columnDefinition = "integer default 0 not null")
+    private Integer puntos = 0;
+
+    @Builder.Default
     @OneToMany(mappedBy = "vendedor")
     private List<Producto> productos = new ArrayList<>();
 
@@ -62,6 +66,10 @@ public class Usuario {
         if (fechaAlta == null) {
             fechaAlta = LocalDateTime.now();
         }
+    }
+
+    public int puntosDisponibles() {
+        return puntos == null ? 0 : puntos;
     }
 
     public String getNombreCompleto() {

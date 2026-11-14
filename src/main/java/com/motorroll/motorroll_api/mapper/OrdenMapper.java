@@ -18,6 +18,13 @@ public class OrdenMapper {
                 .comprador(orden.getComprador().getUsername())
                 .items(orden.getItems().stream().map(this::aItemResponse).toList())
                 .total(orden.getTotal())
+                .subtotal(orden.getSubtotal())
+                .descuentoPorPuntos(orden.getDescuentoPorPuntos())
+                .puntosUsados(orden.getPuntosUsados())
+                .puntosGanados(orden.getPuntosGanados())
+                .metodoPago(orden.getMetodoPago())
+                .cuotas(orden.getCuotas())
+                .direccionEnvio(orden.getDireccionEnvio())
                 .build();
     }
 

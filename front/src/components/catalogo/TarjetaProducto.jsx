@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import FotoProducto from './FotoProducto'
 import PrecioProducto from './PrecioProducto'
+import Calificacion from '../resenas/Calificacion'
 
 function TarjetaProducto({ producto }) {
   return (
@@ -8,8 +9,11 @@ function TarjetaProducto({ producto }) {
       <FotoProducto ruta={producto.imagenPortada} nombre={producto.nombre} />
       <p className="tarjeta-categoria">{producto.categoriaNombre}</p>
       <h2>{producto.nombre}</h2>
-      <PrecioProducto producto={producto} />
-      {!producto.hayStock && <p className="sin-stock">Sin stock</p>}
+      <Calificacion promedio={producto.calificacion} cantidad={producto.cantidadResenas} />
+      <div className="tarjeta-pie">
+        {!producto.hayStock && <p className="sin-stock">Sin stock</p>}
+        <PrecioProducto producto={producto} />
+      </div>
     </Link>
   )
 }

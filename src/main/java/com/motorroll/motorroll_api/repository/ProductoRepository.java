@@ -37,6 +37,9 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
     Optional<Producto> findByIdAndActivoTrue(Long id);
 
+    @Query("SELECT p FROM Producto p JOIN p.fichaTecnica f WHERE p.activo = true AND p.esServicio = false ORDER BY p.precio")
+    List<Producto> listarBancosParaProbar();
+
     List<Producto> findByVendedorIdOrderByFechaAltaDesc(Long vendedorId);
 
     @Query("SELECT DISTINCT p.marca FROM Producto p WHERE p.activo = true AND p.marca IS NOT NULL ORDER BY p.marca")

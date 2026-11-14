@@ -1,12 +1,12 @@
 function TablaCategorias({ categorias, onEditar, onBorrar }) {
   return (
-    <table className="tabla">
+    <table className="tabla tabla-admin">
       <thead>
         <tr>
           <th>Nombre</th>
           <th>Descripción</th>
           <th>Categoría padre</th>
-          <th>Acciones</th>
+          <th className="celda-centrada">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -16,12 +16,14 @@ function TablaCategorias({ categorias, onEditar, onBorrar }) {
             <td>{c.descripcion}</td>
             <td>{c.categoriaPadreNombre || '—'}</td>
             <td>
-              <button className="boton boton-secundario" onClick={() => onEditar(c)}>
-                Editar
-              </button>{' '}
-              <button className="boton" onClick={() => onBorrar(c)}>
-                Borrar
-              </button>
+              <div className="acciones-fila">
+                <button className="boton-accion" onClick={() => onEditar(c)}>
+                  Editar
+                </button>
+                <button className="boton-accion boton-accion-rojo" onClick={() => onBorrar(c)}>
+                  Borrar
+                </button>
+              </div>
             </td>
           </tr>
         ))}

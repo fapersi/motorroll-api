@@ -1,10 +1,14 @@
 function FilaUsuario({ usuario, esYo, onRol, onEstado, onEliminar }) {
   return (
     <tr>
-      <td>{usuario.username}</td>
+      <td>
+        {usuario.username}
+        {esYo && <span className="etiqueta-yo">vos</span>}
+      </td>
       <td>{usuario.email}</td>
       <td>
         <select
+          className="selector-rol"
           value={usuario.rol}
           disabled={esYo}
           onChange={(e) => onRol(usuario.id, e.target.value)}
@@ -14,22 +18,30 @@ function FilaUsuario({ usuario, esYo, onRol, onEstado, onEliminar }) {
           <option value="ADMIN">ADMIN</option>
         </select>
       </td>
-      <td>{usuario.activo ? 'Activo' : 'Deshabilitado'}</td>
+      <td className="celda-centrada">
+        <span
+          className={usuario.activo ? 'pastilla pastilla-activa' : 'pastilla pastilla-inactiva'}
+        >
+          {usuario.activo ? 'Activo' : 'Deshabilitado'}
+        </span>
+      </td>
       <td>
-        <button
-          className="boton boton-secundario"
-          disabled={esYo}
-          onClick={() => onEstado(usuario.id, !usuario.activo)}
-        >
-          {usuario.activo ? 'Deshabilitar' : 'Habilitar'}
-        </button>{' '}
-        <button
-          className="boton"
-          disabled={esYo || usuario.rol === 'ADMIN'}
-          onClick={() => onEliminar(usuario)}
-        >
-          Eliminar
-        </button>
+        <div className="acciones-fila">
+          <button
+            className={usuario.activo ? 'boton-accion' : 'boton-accion boton-accion-verde'}
+            disabled={esYo}
+            onClick={() => onEstado(usuario.id, !usuario.activo)}
+          >
+            {usuario.activo ? 'Deshabilitar' : 'Habilitar'}
+          </button>
+          <button
+            className="boton-accion boton-accion-rojo"
+            disabled={esYo || usuario.rol === 'ADMIN'}
+            onClick={() => onEliminar(usuario)}
+          >
+            Eliminar
+          </button>
+        </div>
       </td>
     </tr>
   )

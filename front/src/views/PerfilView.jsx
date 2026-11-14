@@ -1,41 +1,29 @@
 import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import Aviso from '../components/Aviso'
-import Cargando from '../components/Cargando'
 import FormPerfil from '../components/usuarios/FormPerfil'
-import { actualizarPerfil, obtenerPerfil } from '../services/usuariosService'
+import { fetchPerfil, limpiarError, updatePerfil } from '../redux/usuarioSlice'
 
-function PerfilView({ onLogin }) {
-  const [perfil, setPerfil] = useState(null)
-  const [error, setError] = useState(null)
+function PerfilView() {
+  const dispatch = useDispatch()
+  const { sesion, loading, error } = useSelector((state) => state.usuario)
   const [exito, setExito] = useState(null)
-  const [cargando, setCargando] = useState(false)
 
   useEffect(() => {
-    obtenerPerfil()
-      .then(setPerfil)
-      .catch((e) => setError(e.message))
-  }, [])
+    dispatch(fetchPerfil())
+  }, [dispatch])
 
-  function guardar(datos) {
-    setError(null)
+  function guardar(perfil) {
     setExito(null)
-    setCargando(true)
-    actualizarPerfil(datos)
-      .then((respuesta) => {
-        onLogin(respuesta)
-        setPerfil(respuesta.usuario)
-        setExito('Datos actualizados')
-      })
-      .catch((e) => setError(e.message))
-      .finally(() => setCargando(false))
+    dispatch(updatePerfil(perfil)).then((accion) => {
+      if (!accion.error) setExito('Datos actualizados')
+    })
   }
 
-  if (!perfil) return error ? <Aviso mensaje={error} /> : <Cargando />
-
   return (
-    <FormPerfil usuario={perfil} onEnviar={guardar} cargando={cargando}>
+    <FormPerfil usuario={sesion} onEnviar={guardar} cargando={loading}>
       <Aviso mensaje={exito} tipo="exito" onCerrar={() => setExito(null)} />
-      <Aviso mensaje={error} onCerrar={() => setError(null)} />
+      <Aviso mensaje={error} onCerrar={() => dispatch(limpiarError())} />
     </FormPerfil>
   )
 }

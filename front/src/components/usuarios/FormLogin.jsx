@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 function FormLogin({ onEnviar, cargando, children }) {
   const [datos, setDatos] = useState({ username: '', password: '' })
   const [incompleto, setIncompleto] = useState(false)
+  const [verClave, setVerClave] = useState(false)
 
   function cambiar(e) {
     setDatos({ ...datos, [e.target.name]: e.target.value })
@@ -21,28 +22,44 @@ function FormLogin({ onEnviar, cargando, children }) {
   }
 
   return (
-    <form className="formulario" onSubmit={enviar}>
-      <h1 className="titulo-pagina">Ingresar</h1>
+    <form className="form-acceso" onSubmit={enviar}>
       {children}
-      <label className="campo">
+      <label className="campo campo-icono">
         Usuario
-        <input name="username" value={datos.username} onChange={cambiar} />
+        <span className="input-con-icono">
+          <span aria-hidden="true">👤</span>
+          <input
+            name="username"
+            autoComplete="username"
+            placeholder="Tu usuario"
+            value={datos.username}
+            onChange={cambiar}
+          />
+        </span>
       </label>
-      <label className="campo">
+      <label className="campo campo-icono">
         Contraseña
-        <input
-          type="password"
-          name="password"
-          value={datos.password}
-          onChange={cambiar}
-        />
+        <span className="input-con-icono">
+          <span aria-hidden="true">🔑</span>
+          <input
+            type={verClave ? 'text' : 'password'}
+            name="password"
+            autoComplete="current-password"
+            placeholder="Tu contraseña"
+            value={datos.password}
+            onChange={cambiar}
+          />
+          <button type="button" className="ver-clave" onClick={() => setVerClave(!verClave)}>
+            {verClave ? 'Ocultar' : 'Ver'}
+          </button>
+        </span>
       </label>
       {incompleto && <p className="campo-error">Completá usuario y contraseña</p>}
-      <button className="boton" disabled={cargando}>
+      <button className="boton boton-grande" disabled={cargando}>
         {cargando ? 'Ingresando...' : 'Ingresar'}
       </button>
-      <p>
-        ¿No tenés cuenta? <Link to="/registro">Registrate</Link>
+      <p className="acceso-pie">
+        ¿No tenés cuenta? <Link to="/registro">Creá una gratis</Link>
       </p>
     </form>
   )

@@ -16,13 +16,13 @@ export function obtenerUsuario() {
   const usuario = localStorage.getItem('usuario')
   if (!usuario) return null
   if (Date.now() > obtenerVencimiento()) {
-    cerrarSesion()
+    borrarSesion()
     return null
   }
   return JSON.parse(usuario)
 }
 
-export function cerrarSesion() {
+export function borrarSesion() {
   localStorage.removeItem('token')
   localStorage.removeItem('usuario')
   localStorage.removeItem('venceEn')

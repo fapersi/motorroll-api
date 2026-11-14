@@ -2,7 +2,7 @@ import { useState } from 'react'
 import PanelCategorias from '../components/admin/PanelCategorias'
 import PanelUsuarios from '../components/admin/PanelUsuarios'
 
-function AdminView({ usuario }) {
+function AdminView() {
   const [pestana, setPestana] = useState('usuarios')
 
   return (
@@ -23,7 +23,7 @@ function AdminView({ usuario }) {
         </button>
       </div>
       <div hidden={pestana !== 'usuarios'}>
-        <PanelUsuarios miId={usuario.id} />
+        <PanelUsuarios />
       </div>
       <div hidden={pestana !== 'categorias'}>
         <PanelCategorias />

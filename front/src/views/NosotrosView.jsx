@@ -8,8 +8,9 @@ function NosotrosView() {
       <img src={banner} alt="Motorroll" className="portada-banner" />
       <h1 className="titulo-pagina">Sobre Motorroll</h1>
       <p>
-        Motorroll es un marketplace de bancos de prueba de potencia y equipamiento para talleres. Los
-        fabricantes y distribuidores publican sus productos y los talleres los compran en un solo lugar.
+        Motorroll es un marketplace de bancos de prueba de potencia y equipamiento para talleres.
+        Los fabricantes y distribuidores publican sus productos y los talleres los compran en un
+        solo lugar.
       </p>
       <div className="nosotros-fotos">
         <img src={banco} alt="Banco de rodillos para autos" />

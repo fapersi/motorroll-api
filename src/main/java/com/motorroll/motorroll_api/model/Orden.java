@@ -34,6 +34,27 @@ public class Orden {
     @Column(nullable = false, precision = 14, scale = 2)
     private BigDecimal total;
 
+    @Column(precision = 14, scale = 2)
+    private BigDecimal subtotal;
+
+    @Column(name = "descuento_puntos", precision = 14, scale = 2)
+    private BigDecimal descuentoPorPuntos;
+
+    @Column(name = "puntos_usados")
+    private Integer puntosUsados;
+
+    @Column(name = "puntos_ganados")
+    private Integer puntosGanados;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "metodo_pago", length = 30)
+    private MetodoPago metodoPago;
+
+    private Integer cuotas;
+
+    @Column(name = "direccion_envio", length = 200)
+    private String direccionEnvio;
+
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

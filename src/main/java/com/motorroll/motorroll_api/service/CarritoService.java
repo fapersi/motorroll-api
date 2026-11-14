@@ -2,6 +2,7 @@ package com.motorroll.motorroll_api.service;
 
 import com.motorroll.motorroll_api.dto.carrito.AgregarItemRequest;
 import com.motorroll.motorroll_api.dto.carrito.CarritoResponse;
+import com.motorroll.motorroll_api.dto.carrito.CheckoutRequest;
 import com.motorroll.motorroll_api.dto.orden.OrdenResponse;
 
 public interface CarritoService {
@@ -15,5 +16,5 @@ public interface CarritoService {
 
     CarritoResponse vaciar(String username);
 
-    OrdenResponse checkout(String username);
+    OrdenResponse checkout(String username, CheckoutRequest request);
 }

@@ -1,6 +1,8 @@
+import { useSelector } from 'react-redux'
 import { Navigate, useLocation } from 'react-router-dom'
 
-function RutaPrivada({ usuario, roles, children }) {
+function RutaPrivada({ roles, children }) {
+  const usuario = useSelector((state) => state.usuario.sesion)
   const location = useLocation()
 
   if (!usuario) {

@@ -5,3 +5,11 @@ export function formatearPrecio(valor) {
 export function formatearFecha(fecha) {
   return new Date(fecha).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })
 }
+
+export function formatearDia(fecha) {
+  return new Date(fecha).toLocaleDateString('es-AR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+}
