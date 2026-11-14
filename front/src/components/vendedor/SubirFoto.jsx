@@ -7,7 +7,7 @@ function SubirFoto({ onSubir }) {
   }
 
   return (
-    <label className="boton boton-secundario">
+    <label className="boton-accion">
       Agregar foto
       <input type="file" accept={TIPOS_DE_FOTO.join(',')} hidden onChange={elegir} />
     </label>

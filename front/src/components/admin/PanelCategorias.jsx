@@ -1,61 +1,58 @@
 import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import Aviso from '../Aviso'
 import Cargando from '../Cargando'
 import Modal from '../Modal'
 import FormCategoria from './FormCategoria'
 import TablaCategorias from './TablaCategorias'
-import conCambios from './conCambios'
 import {
-  borrarCategoria,
-  guardarCategoria,
-  listarCategorias,
-} from '../../services/categoriasService'
+  createCategoria,
+  deleteCategoria,
+  fetchCategorias,
+  limpiarError,
+  updateCategoria,
+} from '../../redux/categoriaSlice'
 
 function PanelCategorias() {
-  const [categorias, setCategorias] = useState(null)
-  const [error, setError] = useState(null)
+  const dispatch = useDispatch()
+  const { items, cargado, error } = useSelector((state) => state.categorias)
   const [editando, setEditando] = useState(null)
   const [aBorrar, setABorrar] = useState(null)
   const [version, setVersion] = useState(0)
 
   useEffect(() => {
-    listarCategorias()
-      .then(setCategorias)
-      .catch((e) => setError(e.message))
-  }, [])
+    if (!cargado) dispatch(fetchCategorias())
+  }, [dispatch, cargado])
 
-  function guardar(datos) {
-    setError(null)
-    guardarCategoria(editando ? editando.id : null, datos)
-      .then((guardada) => {
-        setCategorias(editando ? conCambios(categorias, guardada) : [...categorias, guardada])
-        setEditando(null)
-        setVersion(version + 1)
-      })
-      .catch((e) => setError(e.message))
+  function guardar(categoria) {
+    const accion = editando
+      ? updateCategoria({ id: editando.id, ...categoria })
+      : createCategoria(categoria)
+    dispatch(accion).then((resultado) => {
+      if (resultado.error) return
+      setEditando(null)
+      setVersion(version + 1)
+    })
   }
 
   function borrar() {
-    setError(null)
-    borrarCategoria(aBorrar.id)
-      .then(() => setCategorias(categorias.filter((c) => c.id !== aBorrar.id)))
-      .catch((e) => setError(e.message))
-      .finally(() => setABorrar(null))
+    dispatch(deleteCategoria(aBorrar.id))
+    setABorrar(null)
   }
 
-  if (!categorias) return error ? <Aviso mensaje={error} /> : <Cargando />
+  if (!cargado) return error ? <Aviso mensaje={error} /> : <Cargando />
 
   return (
     <>
-      <Aviso mensaje={error} onCerrar={() => setError(null)} />
+      <Aviso mensaje={error} onCerrar={() => dispatch(limpiarError())} />
       <FormCategoria
         key={editando ? `editar-${editando.id}` : `nueva-${version}`}
         categoria={editando}
-        categorias={categorias}
+        categorias={items}
         onEnviar={guardar}
         onCancelar={() => setEditando(null)}
       />
-      <TablaCategorias categorias={categorias} onEditar={setEditando} onBorrar={setABorrar} />
+      <TablaCategorias categorias={items} onEditar={setEditando} onBorrar={setABorrar} />
       {aBorrar && (
         <Modal
           titulo={`¿Borrar la categoría ${aBorrar.nombre}?`}

@@ -31,7 +31,12 @@ function FilaPublicacion({ producto, onEditar, onStock, onDescuento, onFoto, onB
         <EditorNumero key={producto.stock} valor={producto.stock} onGuardar={onStock} />
       </td>
       <td>
-        <EditorNumero key={producto.descuento} valor={producto.descuento} onGuardar={onDescuento} />
+        <EditorNumero
+          key={producto.descuento}
+          valor={producto.descuento}
+          maximo={100}
+          onGuardar={onDescuento}
+        />
       </td>
       <td>{producto.hayStock ? 'Publicada' : 'Sin stock'}</td>
       <td>

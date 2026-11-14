@@ -11,12 +11,12 @@ function AccionesPublicacion({ nombre, onEditar, onFoto, onBaja }) {
   }
 
   return (
-    <div className="celda-acciones">
-      <button className="boton boton-secundario" onClick={onEditar}>
+    <div className="acciones-fila">
+      <button className="boton-accion" onClick={onEditar}>
         Editar
       </button>
       <SubirFoto onSubir={onFoto} />
-      <button className="boton" onClick={() => setConfirmando(true)}>
+      <button className="boton-accion boton-accion-rojo" onClick={() => setConfirmando(true)}>
         Dar de baja
       </button>
       {confirmando && (

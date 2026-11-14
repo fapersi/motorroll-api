@@ -1,34 +1,27 @@
-import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { Navigate, useLocation } from 'react-router-dom'
 import Aviso from '../components/Aviso'
 import FormLogin from '../components/usuarios/FormLogin'
-import { login } from '../services/usuariosService'
+import PantallaAcceso from '../components/usuarios/PantallaAcceso'
+import { limpiarError, login } from '../redux/usuarioSlice'
 
-function LoginView({ onLogin }) {
-  const [error, setError] = useState(null)
-  const [cargando, setCargando] = useState(false)
-  const navigate = useNavigate()
+function LoginView() {
+  const dispatch = useDispatch()
+  const { sesion, loading, error } = useSelector((state) => state.usuario)
   const location = useLocation()
 
-  function ingresar(datos) {
-    setError(null)
-    setCargando(true)
-    login(datos)
-      .then((respuesta) => {
-        onLogin(respuesta)
-        navigate(location.state?.desde || '/')
-      })
-      .catch((e) => {
-        setError(e.message)
-        setCargando(false)
-      })
-  }
+  if (sesion) return <Navigate to={location.state?.desde || '/'} replace />
 
   return (
-    <FormLogin onEnviar={ingresar} cargando={cargando}>
-      <Aviso mensaje={location.state?.aviso} tipo="info" />
-      <Aviso mensaje={error} onCerrar={() => setError(null)} />
-    </FormLogin>
+    <PantallaAcceso
+      titulo="Bienvenido de nuevo"
+      bajada="Ingresá para comprar, reservar turnos y ver tus órdenes."
+    >
+      <FormLogin onEnviar={(credenciales) => dispatch(login(credenciales))} cargando={loading}>
+        <Aviso mensaje={location.state?.aviso} tipo="info" />
+        <Aviso mensaje={error} onCerrar={() => dispatch(limpiarError())} />
+      </FormLogin>
+    </PantallaAcceso>
   )
 }
 

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import MenuUsuario from './MenuUsuario'
 import logo from '../../assets/logo-motorroll.jpg'
@@ -8,12 +9,14 @@ const TODOS = ['INVITADO', 'COMPRADOR', 'VENDEDOR', 'ADMIN']
 const LINKS = [
   { ruta: '/nosotros', texto: 'Nosotros', roles: TODOS },
   { ruta: '/', texto: 'Catálogo', roles: TODOS },
+  { ruta: '/turnos', texto: 'Probá un banco', roles: ['INVITADO', 'COMPRADOR'] },
   { ruta: '/ordenes', texto: 'Mis órdenes', roles: ['COMPRADOR'] },
   { ruta: '/vendedor', texto: 'Panel vendedor', roles: ['VENDEDOR', 'ADMIN'] },
   { ruta: '/admin', texto: 'Admin', roles: ['ADMIN'] },
 ]
 
-function Navbar({ usuario, onSalir }) {
+function Navbar() {
+  const usuario = useSelector((state) => state.usuario.sesion)
   const [abierto, setAbierto] = useState(false)
   const rol = usuario ? usuario.rol : 'INVITADO'
   const links = LINKS.filter((link) => link.roles.includes(rol))
@@ -36,7 +39,7 @@ function Navbar({ usuario, onSalir }) {
             </li>
           ))}
         </ul>
-        <MenuUsuario usuario={usuario} onSalir={onSalir} />
+        <MenuUsuario usuario={usuario} />
       </nav>
     </header>
   )

@@ -1,42 +1,39 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { guardarSesion, obtenerToken, obtenerUsuario, obtenerVencimiento, cerrarSesion } from './utils/sesion'
+import { cerrarSesion } from './redux/usuarioSlice'
+import { obtenerVencimiento } from './utils/sesion'
+import { SESION_VENCIDA } from './utils/api'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
 import Rutas from './routes/Rutas'
 
-const SESION_VENCIDA = { state: { aviso: 'Tu sesión venció. Volvé a ingresar.' } }
-
 function App() {
-  const [usuario, setUsuario] = useState(obtenerUsuario())
+  const { sesion } = useSelector((state) => state.usuario)
+  const dispatch = useDispatch()
   const navigate = useNavigate()
-  useLocation()
-  const sesion = obtenerToken() ? usuario : null
-
-  const iniciarSesion = (respuesta) => {
-    guardarSesion(respuesta)
-    setUsuario(respuesta.usuario)
-  }
-
-  const salir = () => {
-    cerrarSesion()
-    setUsuario(null)
-  }
+  const { pathname } = useLocation()
+  const arriba = useRef(null)
 
   useEffect(() => {
-    if (!usuario) return
+    arriba.current.scrollIntoView()
+  }, [pathname])
+
+  useEffect(() => {
+    if (!sesion) return
     const temporizador = setTimeout(() => {
-      salir()
-      navigate('/login', SESION_VENCIDA)
+      dispatch(cerrarSesion())
+      navigate('/login', { state: { aviso: SESION_VENCIDA } })
     }, obtenerVencimiento() - Date.now())
     return () => clearTimeout(temporizador)
-  }, [usuario, navigate])
+  }, [sesion, dispatch, navigate])
 
   return (
     <>
-      <Navbar usuario={sesion} onSalir={salir} />
+      <span ref={arriba} />
+      <Navbar />
       <main className="contenido">
-        <Rutas usuario={sesion} onLogin={iniciarSesion} />
+        <Rutas />
       </main>
       <Footer />
     </>

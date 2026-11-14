@@ -1,12 +1,10 @@
+import { useDispatch } from 'react-redux'
 import FilaPublicacion from './FilaPublicacion'
-import {
-  agregarFotos,
-  cambiarDescuento,
-  cambiarStock,
-  darDeBaja,
-} from '../../services/catalogoService'
+import { addFoto, deleteProducto, updateDescuento, updateStock } from '../../redux/productoSlice'
 
-function TablaPublicaciones({ productos, onEditar, onCambio }) {
+function TablaPublicaciones({ productos, onEditar }) {
+  const dispatch = useDispatch()
+
   if (productos.length === 0) {
     return <p className="vacio">Todavía no publicaste productos.</p>
   }
@@ -29,10 +27,10 @@ function TablaPublicaciones({ productos, onEditar, onCambio }) {
             key={producto.id}
             producto={producto}
             onEditar={() => onEditar(producto)}
-            onStock={(stock) => onCambio(cambiarStock(producto, stock))}
-            onDescuento={(descuento) => onCambio(cambiarDescuento(producto, descuento))}
-            onFoto={(foto) => onCambio(agregarFotos(producto, [foto]))}
-            onBaja={() => onCambio(darDeBaja(producto))}
+            onStock={(stock) => dispatch(updateStock({ id: producto.id, stock }))}
+            onDescuento={(descuento) => dispatch(updateDescuento({ id: producto.id, descuento }))}
+            onFoto={(foto) => dispatch(addFoto({ producto, foto }))}
+            onBaja={() => dispatch(deleteProducto(producto.id))}
           />
         ))}
       </tbody>

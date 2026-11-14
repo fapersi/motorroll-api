@@ -43,7 +43,9 @@ export function validarProducto(datos, fotos, esNuevo) {
   if (datos.nombre.trim() === '') errores.nombre = 'El nombre es obligatorio'
   if (datos.descripcion.trim() === '') errores.descripcion = 'La descripción es obligatoria'
   if (datos.precio === '' || precio <= 0) errores.precio = 'El precio tiene que ser mayor a cero'
-  if (datos.stock === '' || stock < 0) errores.stock = 'El stock no puede ser negativo'
+  if (datos.stock === '' || stock < 0 || !Number.isInteger(stock)) {
+    errores.stock = 'El stock tiene que ser un número entero, 0 o más'
+  }
   if (descuento < 0 || descuento > 100) errores.descuento = 'Tiene que estar entre 0 y 100'
   if (datos.categoriaId === '') errores.categoriaId = 'Elegí una categoría'
   if (errorFotos) errores.fotos = errorFotos

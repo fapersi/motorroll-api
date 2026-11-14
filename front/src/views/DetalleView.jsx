@@ -1,39 +1,43 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Link, useParams } from 'react-router-dom'
 import Aviso from '../components/Aviso'
 import Cargando from '../components/Cargando'
 import Galeria from '../components/catalogo/Galeria'
 import InfoProducto from '../components/catalogo/InfoProducto'
-import { obtenerProducto } from '../services/catalogoService'
+import SeccionResenas from '../components/resenas/SeccionResenas'
+import { fetchProductoPorId } from '../redux/productoSlice'
 
-function DetalleView({ usuario }) {
+function DetalleView() {
   const { id } = useParams()
-  const [producto, setProducto] = useState(null)
-  const [error, setError] = useState(null)
+  const dispatch = useDispatch()
+  const { detalle, error } = useSelector((state) => state.productos)
+  const cargado = detalle !== null && String(detalle.id) === id
 
   useEffect(() => {
-    obtenerProducto(id)
-      .then(setProducto)
-      .catch((e) => setError(e.message))
-  }, [id])
+    if (!cargado) dispatch(fetchProductoPorId(id))
+  }, [dispatch, id, cargado])
 
-  if (error) {
+  if (cargado) {
     return (
-      <section className="pagina-sistema">
-        <Aviso mensaje={error} />
-        <Link to="/" className="boton">
-          Volver al catálogo
-        </Link>
-      </section>
+      <>
+        <section className="detalle">
+          <Galeria imagenes={detalle.imagenes} nombre={detalle.nombre} />
+          <InfoProducto producto={detalle} />
+        </section>
+        <SeccionResenas productoId={detalle.id} />
+      </>
     )
   }
 
-  if (!producto) return <Cargando />
+  if (!error) return <Cargando />
 
   return (
-    <section className="detalle">
-      <Galeria imagenes={producto.imagenes} nombre={producto.nombre} />
-      <InfoProducto producto={producto} usuario={usuario} />
+    <section className="pagina-sistema">
+      <Aviso mensaje={error} />
+      <Link to="/" className="boton">
+        Volver al catálogo
+      </Link>
     </section>
   )
 }

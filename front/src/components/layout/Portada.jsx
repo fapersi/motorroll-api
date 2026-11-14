@@ -1,16 +1,42 @@
-import banner from '../../assets/banner-motorroll.jpg'
+import { Link } from 'react-router-dom'
+import CurvaDyno from './CurvaDyno'
 import banco from '../../assets/banco-rodillos.jpg'
+
+const VENTAJAS = [
+  { titulo: 'Probalo antes de comprar', texto: 'Reservá un turno en el taller' },
+  { titulo: 'Hasta 12 cuotas', texto: 'Con tarjeta de crédito' },
+  { titulo: '10% de descuento', texto: 'Canjeando 500 puntos' },
+]
 
 function Portada() {
   return (
-    <section className="portada">
-      <img src={banner} alt="Motorroll" className="portada-banner" />
-      <div>
-        <h1>Bancos de prueba y equipamiento para talleres</h1>
-        <p>Comprá directo a fabricantes y distribuidores, o publicá tus productos.</p>
-      </div>
-      <img src={banco} alt="Banco de rodillos" />
-    </section>
+    <>
+      <section className="portada" style={{ backgroundImage: `url(${banco})` }}>
+        <div className="portada-texto">
+          <h1>Medí la potencia real de cada motor</h1>
+          <p>
+            Bancos de prueba y equipamiento para talleres, directo de fabricantes y distribuidores.
+          </p>
+          <div className="portada-botones">
+            <a href="#catalogo" className="boton boton-grande">
+              Ver catálogo
+            </a>
+            <Link to="/turnos" className="boton boton-grande boton-secundario">
+              Probá un banco
+            </Link>
+          </div>
+        </div>
+        <CurvaDyno />
+      </section>
+      <ul className="ventajas">
+        {VENTAJAS.map((ventaja) => (
+          <li key={ventaja.titulo}>
+            <strong>{ventaja.titulo}</strong>
+            {ventaja.texto}
+          </li>
+        ))}
+      </ul>
+    </>
   )
 }
 

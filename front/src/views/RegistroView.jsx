@@ -1,32 +1,22 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { Navigate } from 'react-router-dom'
 import Aviso from '../components/Aviso'
 import FormRegistro from '../components/usuarios/FormRegistro'
-import { registrar } from '../services/usuariosService'
+import PantallaAcceso from '../components/usuarios/PantallaAcceso'
+import { limpiarError, registrar } from '../redux/usuarioSlice'
 
-function RegistroView({ onLogin }) {
-  const [error, setError] = useState(null)
-  const [cargando, setCargando] = useState(false)
-  const navigate = useNavigate()
+function RegistroView() {
+  const dispatch = useDispatch()
+  const { sesion, loading, error } = useSelector((state) => state.usuario)
 
-  function crearCuenta(datos) {
-    setError(null)
-    setCargando(true)
-    registrar(datos)
-      .then((respuesta) => {
-        onLogin(respuesta)
-        navigate('/')
-      })
-      .catch((e) => {
-        setError(e.message)
-        setCargando(false)
-      })
-  }
+  if (sesion) return <Navigate to="/" replace />
 
   return (
-    <FormRegistro onEnviar={crearCuenta} cargando={cargando}>
-      <Aviso mensaje={error} onCerrar={() => setError(null)} />
-    </FormRegistro>
+    <PantallaAcceso titulo="Crear cuenta" bajada="Comprá o publicá equipamiento en minutos.">
+      <FormRegistro onEnviar={(nuevo) => dispatch(registrar(nuevo))} cargando={loading}>
+        <Aviso mensaje={error} onCerrar={() => dispatch(limpiarError())} />
+      </FormRegistro>
+    </PantallaAcceso>
   )
 }
 

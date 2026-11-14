@@ -1,67 +1,51 @@
 import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import Aviso from '../components/Aviso'
 import Cargando from '../components/Cargando'
 import FormProducto from '../components/vendedor/FormProducto'
 import TablaPublicaciones from '../components/vendedor/TablaPublicaciones'
-import { listarCategorias } from '../services/categoriasService'
-import { misPublicaciones } from '../services/catalogoService'
+import { fetchCategorias } from '../redux/categoriaSlice'
+import { fetchMisProductos, limpiarError } from '../redux/productoSlice'
 
 function PanelVendedorView() {
-  const [publicaciones, setPublicaciones] = useState(null)
-  const [categorias, setCategorias] = useState([])
+  const dispatch = useDispatch()
+  const { mios, miosCargados, error } = useSelector((state) => state.productos)
+  const categorias = useSelector((state) => state.categorias)
   const [creando, setCreando] = useState(false)
   const [editando, setEditando] = useState(null)
-  const [error, setError] = useState(null)
 
   useEffect(() => {
-    misPublicaciones()
-      .then(setPublicaciones)
-      .catch((e) => setError(e.message))
-    listarCategorias()
-      .then(setCategorias)
-      .catch((e) => setError(e.message))
-  }, [])
+    if (!miosCargados) dispatch(fetchMisProductos())
+  }, [dispatch, miosCargados])
 
-  function reemplazar(producto) {
-    setPublicaciones(publicaciones.map((p) => (p.id === producto.id ? producto : p)))
-  }
-
-  function actualizar(promesa) {
-    setError(null)
-    promesa.then(reemplazar).catch((e) => setError(e.message))
-  }
+  useEffect(() => {
+    if (!categorias.cargado) dispatch(fetchCategorias())
+  }, [dispatch, categorias.cargado])
 
   function cerrarFormulario() {
     setCreando(false)
     setEditando(null)
   }
 
-  function guardado(producto) {
-    if (editando) reemplazar(producto)
-    else setPublicaciones([producto, ...publicaciones])
-    cerrarFormulario()
-  }
-
-  if (!publicaciones) return error ? <Aviso mensaje={error} /> : <Cargando />
+  if (!miosCargados) return error ? <Aviso mensaje={error} /> : <Cargando />
 
   return (
     <section>
       <h1 className="titulo-pagina">Mis publicaciones</h1>
-      <Aviso mensaje={error} onCerrar={() => setError(null)} />
+      <Aviso mensaje={error} onCerrar={() => dispatch(limpiarError())} />
       {creando || editando ? (
         <FormProducto
           key={editando ? editando.id : 'nuevo'}
           producto={editando}
-          categorias={categorias}
-          onGuardado={guardado}
-          onCancelar={cerrarFormulario}
+          categorias={categorias.items}
+          onCerrar={cerrarFormulario}
         />
       ) : (
         <button className="boton" onClick={() => setCreando(true)}>
           Publicar producto
         </button>
       )}
-      <TablaPublicaciones productos={publicaciones} onEditar={setEditando} onCambio={actualizar} />
+      <TablaPublicaciones productos={mios} onEditar={setEditando} />
     </section>
   )
 }
