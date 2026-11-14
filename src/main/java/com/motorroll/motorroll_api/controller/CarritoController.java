@@ -3,6 +3,7 @@ package com.motorroll.motorroll_api.controller;
 import com.motorroll.motorroll_api.dto.carrito.ActualizarCantidadRequest;
 import com.motorroll.motorroll_api.dto.carrito.AgregarItemRequest;
 import com.motorroll.motorroll_api.dto.carrito.CarritoResponse;
+import com.motorroll.motorroll_api.dto.carrito.CheckoutRequest;
 import com.motorroll.motorroll_api.dto.orden.OrdenResponse;
 import com.motorroll.motorroll_api.service.CarritoService;
 import jakarta.validation.Valid;
@@ -49,7 +50,9 @@ public class CarritoController {
     }
 
     @PostMapping("/checkout")
-    public ResponseEntity<OrdenResponse> checkout(Authentication authentication) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(carritoService.checkout(authentication.getName()));
+    public ResponseEntity<OrdenResponse> checkout(Authentication authentication,
+                                                  @Valid @RequestBody(required = false) CheckoutRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(carritoService.checkout(authentication.getName(), request));
     }
 }

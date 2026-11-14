@@ -1,5 +1,6 @@
 package com.motorroll.motorroll_api.model;
 
+import com.motorroll.motorroll_api.exception.ReglaDeNegocioException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -70,6 +71,10 @@ public class Producto {
     @OneToOne(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private FichaTecnica fichaTecnica;
 
+    @Builder.Default
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Resena> resenas = new ArrayList<>();
+
     @PrePersist
     public void alCrear() {
         if (fechaAlta == null) {
@@ -86,8 +91,27 @@ public class Producto {
         return precio.multiply(porcentajeRestante).setScale(2, RoundingMode.HALF_UP);
     }
 
+    public void setStock(Integer stock) {
+        if (stock == null || stock < 0) {
+            throw new ReglaDeNegocioException("El stock no puede ser negativo");
+        }
+        this.stock = stock;
+    }
+
     public boolean hayStockPara(int cantidad) {
         return stock != null && stock >= cantidad;
+    }
+
+    public Double calcularCalificacion() {
+        if (resenas == null || resenas.isEmpty()) {
+            return null;
+        }
+        double promedio = resenas.stream().mapToInt(Resena::getEstrellas).average().orElse(0);
+        return Math.round(promedio * 10) / 10.0;
+    }
+
+    public int contarResenas() {
+        return resenas == null ? 0 : resenas.size();
     }
 
     public void agregarImagen(ImagenProducto imagen) {

@@ -18,6 +18,7 @@ public class UsuarioMapper {
                 .rol(usuario.getRol())
                 .fechaAlta(usuario.getFechaAlta())
                 .activo(usuario.isActivo())
+                .puntos(usuario.puntosDisponibles())
                 .build();
     }
 

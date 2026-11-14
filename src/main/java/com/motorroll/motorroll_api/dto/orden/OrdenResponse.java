@@ -1,6 +1,7 @@
 package com.motorroll.motorroll_api.dto.orden;
 
 import com.motorroll.motorroll_api.model.EstadoOrden;
+import com.motorroll.motorroll_api.model.MetodoPago;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,4 +22,11 @@ public class OrdenResponse {
     private String comprador;
     private List<ItemOrdenResponse> items;
     private BigDecimal total;
+    private BigDecimal subtotal;
+    private BigDecimal descuentoPorPuntos;
+    private Integer puntosUsados;
+    private Integer puntosGanados;
+    private MetodoPago metodoPago;
+    private Integer cuotas;
+    private String direccionEnvio;
 }

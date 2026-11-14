@@ -32,4 +32,6 @@ public class ProductoDetalleResponse {
     private String vendedor;
     private List<ImagenResponse> imagenes;
     private FichaTecnicaResponse fichaTecnica;
+    private Double calificacion;
+    private int cantidadResenas;
 }

@@ -25,4 +25,6 @@ public class ProductoResumenResponse {
     private Long categoriaId;
     private String categoriaNombre;
     private String vendedor;
+    private Double calificacion;
+    private int cantidadResenas;
 }
