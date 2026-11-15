@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import Aviso from '../Aviso'
 import Cargando from '../Cargando'
-import Modal from '../Modal'
+import ModalEliminar from './ModalEliminar'
+import ModalRol from './ModalRol'
 import TablaUsuarios from './TablaUsuarios'
 import {
   deleteUsuario,
@@ -11,15 +12,23 @@ import {
   updateEstado,
   updateRol,
 } from '../../redux/usuarioSlice'
+import { useLimpiarAlSalir } from '../../hooks/useLimpiarAlSalir'
 
 function PanelUsuarios() {
   const dispatch = useDispatch()
-  const { sesion, lista, listaCargada, error } = useSelector((state) => state.usuario)
+  const { sesion, lista, listaCargada, loading, error } = useSelector((state) => state.usuario)
   const [aEliminar, setAEliminar] = useState(null)
+  const [cambioRol, setCambioRol] = useState(null)
+  useLimpiarAlSalir(limpiarError)
 
   useEffect(() => {
     if (!listaCargada) dispatch(fetchUsuarios())
   }, [dispatch, listaCargada])
+
+  function confirmarRol() {
+    dispatch(updateRol({ id: cambioRol.usuario.id, rol: cambioRol.rol }))
+    setCambioRol(null)
+  }
 
   function eliminar() {
     dispatch(deleteUsuario(aEliminar.id))
@@ -28,20 +37,28 @@ function PanelUsuarios() {
 
   return (
     <>
-      <Aviso mensaje={error} onCerrar={() => dispatch(limpiarError())} />
+      <Aviso mensaje={error} flotante onCerrar={() => dispatch(limpiarError())} />
       {!listaCargada && !error && <Cargando />}
       {listaCargada && (
         <TablaUsuarios
           usuarios={lista}
           miId={sesion.id}
-          onRol={(id, rol) => dispatch(updateRol({ id, rol }))}
+          ocupado={loading}
+          onRol={(usuario, rol) => setCambioRol({ usuario, rol })}
           onEstado={(id, activo) => dispatch(updateEstado({ id, activo }))}
           onEliminar={setAEliminar}
         />
       )}
+      {cambioRol && (
+        <ModalRol
+          cambio={cambioRol}
+          onConfirmar={confirmarRol}
+          onCancelar={() => setCambioRol(null)}
+        />
+      )}
       {aEliminar && (
-        <Modal
-          titulo={`¿Eliminar a ${aEliminar.username}?`}
+        <ModalEliminar
+          usuario={aEliminar}
           onConfirmar={eliminar}
           onCancelar={() => setAEliminar(null)}
         />

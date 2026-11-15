@@ -12,6 +12,7 @@ import {
   limpiarError,
   updateCategoria,
 } from '../../redux/categoriaSlice'
+import { useLimpiarAlSalir } from '../../hooks/useLimpiarAlSalir'
 
 function PanelCategorias() {
   const dispatch = useDispatch()
@@ -19,6 +20,7 @@ function PanelCategorias() {
   const [editando, setEditando] = useState(null)
   const [aBorrar, setABorrar] = useState(null)
   const [version, setVersion] = useState(0)
+  useLimpiarAlSalir(limpiarError)
 
   useEffect(() => {
     if (!cargado) dispatch(fetchCategorias())
@@ -44,7 +46,7 @@ function PanelCategorias() {
 
   return (
     <>
-      <Aviso mensaje={error} onCerrar={() => dispatch(limpiarError())} />
+      <Aviso mensaje={error} flotante onCerrar={() => dispatch(limpiarError())} />
       <FormCategoria
         key={editando ? `editar-${editando.id}` : `nueva-${version}`}
         categoria={editando}

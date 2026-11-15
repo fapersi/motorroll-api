@@ -3,22 +3,25 @@ import FormTurno from './FormTurno'
 import Horarios from './Horarios'
 import { disponibilidad } from './disponibilidad'
 
-function AgendaTurno({ agenda, eleccion, enviando, onReservar }) {
-  const { ocupadosDelDia, diasLlenos } = disponibilidad(agenda, eleccion.banco.id, eleccion.fecha)
+function AgendaTurno({ agenda, misTurnos, eleccion, enviando, onReservar }) {
+  const { banco, fecha } = eleccion
+  const lugares = disponibilidad(agenda, banco.id, fecha, misTurnos)
 
   return (
     <div className="tarjeta turnos-agenda">
-      <h2 className="paso">Día, horario y tus datos</h2>
+      <h2 className="paso">3. Día, horario y tus datos</h2>
       <Calendario
-        elegida={eleccion.fecha}
+        elegida={fecha}
         diasDeAnticipacion={agenda.diasDeAnticipacion}
-        diasLlenos={diasLlenos}
+        diasLlenos={lugares.diasLlenos}
+        feriados={agenda.feriados || []}
         onElegir={eleccion.elegirFecha}
       />
-      {eleccion.fecha && (
+      {fecha && (
         <Horarios
           horarios={agenda.horarios}
-          ocupados={ocupadosDelDia}
+          ocupados={lugares.ocupadosDelDia}
+          propios={lugares.propiosDelDia}
           elegido={eleccion.hora}
           onElegir={eleccion.setHora}
         />

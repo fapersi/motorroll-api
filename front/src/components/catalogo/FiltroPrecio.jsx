@@ -26,16 +26,18 @@ function FiltroPrecio({ minimo, maximo, onAplicar }) {
         <input
           type="number"
           name="precioMin"
+          aria-label="Precio desde"
           min="0"
-          placeholder="Mínimo"
+          placeholder="Desde"
           value={rango.precioMin}
           onChange={cambiar}
         />
         <input
           type="number"
           name="precioMax"
+          aria-label="Precio hasta"
           min="0"
-          placeholder="Máximo"
+          placeholder="Hasta"
           value={rango.precioMax}
           onChange={cambiar}
         />

@@ -1,6 +1,6 @@
 import FilaUsuario from './FilaUsuario'
 
-function TablaUsuarios({ usuarios, miId, onRol, onEstado, onEliminar }) {
+function TablaUsuarios({ usuarios, miId, ocupado, onRol, onEstado, onEliminar }) {
   return (
     <table className="tabla tabla-admin">
       <thead>
@@ -13,11 +13,12 @@ function TablaUsuarios({ usuarios, miId, onRol, onEstado, onEliminar }) {
         </tr>
       </thead>
       <tbody>
-        {usuarios.map((u) => (
+        {usuarios.map((usuario) => (
           <FilaUsuario
-            key={u.id}
-            usuario={u}
-            esYo={u.id === miId}
+            key={usuario.id}
+            usuario={usuario}
+            esYo={usuario.id === miId}
+            ocupado={ocupado}
             onRol={onRol}
             onEstado={onEstado}
             onEliminar={onEliminar}

@@ -1,8 +1,17 @@
 import TarjetaProducto from './TarjetaProducto'
 
-function GrillaProductos({ productos }) {
+function GrillaProductos({ productos, mensajeVacio, onLimpiar }) {
   if (productos.length === 0) {
-    return <p className="vacio">No hay productos que coincidan con la búsqueda.</p>
+    return (
+      <div className="vacio vacio-acciones">
+        <p>{mensajeVacio || 'No hay equipos que coincidan con la búsqueda.'}</p>
+        {onLimpiar && (
+          <button type="button" className="boton boton-secundario" onClick={onLimpiar}>
+            Limpiar filtros
+          </button>
+        )}
+      </div>
+    )
   }
 
   return (

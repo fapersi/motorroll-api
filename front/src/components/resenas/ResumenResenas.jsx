@@ -1,5 +1,7 @@
 import Estrellas from './Estrellas'
 
+const ESTRELLAS = [5, 4, 3, 2, 1]
+
 function ResumenResenas({ resumen }) {
   const maximo = Math.max(1, ...resumen.porEstrellas)
 
@@ -13,15 +15,21 @@ function ResumenResenas({ resumen }) {
         </p>
       </div>
       <ul className="barras-estrellas">
-        {resumen.porEstrellas.map((cantidad, i) => (
-          <li key={5 - i}>
-            <span>{5 - i} ★</span>
-            <span className="barra">
-              <span className="barra-relleno" style={{ width: `${(cantidad / maximo) * 100}%` }} />
-            </span>
-            <span className="barra-cantidad">{cantidad}</span>
-          </li>
-        ))}
+        {ESTRELLAS.map((estrellas) => {
+          const cantidad = resumen.porEstrellas[5 - estrellas]
+          return (
+            <li key={estrellas}>
+              <span>{estrellas} ★</span>
+              <span className="barra">
+                <span
+                  className="barra-relleno"
+                  style={{ width: `${(cantidad / maximo) * 100}%` }}
+                />
+              </span>
+              <span className="barra-cantidad">{cantidad}</span>
+            </li>
+          )
+        })}
       </ul>
     </div>
   )

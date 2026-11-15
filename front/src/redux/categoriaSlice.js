@@ -24,6 +24,11 @@ export const deleteCategoria = createAsyncThunk('categorias/deleteCategoria', as
   return id
 })
 
+const cargando = (state) => {
+  state.loading = true
+  state.error = null
+}
+
 const guardarError = (state, action) => {
   state.loading = false
   state.error = action.error.message
@@ -39,22 +44,23 @@ const categoriaSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchCategorias.pending, (state) => {
-        state.loading = true
-        state.error = null
-      })
+      .addCase(fetchCategorias.pending, cargando)
       .addCase(fetchCategorias.fulfilled, (state, action) => {
         state.loading = false
         state.items = action.payload
         state.cargado = true
       })
       .addCase(fetchCategorias.rejected, guardarError)
+      .addCase(createCategoria.pending, cargando)
       .addCase(createCategoria.fulfilled, (state, action) => {
+        state.loading = false
         state.items = [...state.items, action.payload]
       })
       .addCase(createCategoria.rejected, guardarError)
+      .addCase(updateCategoria.pending, cargando)
       .addCase(updateCategoria.fulfilled, (state, action) => {
         const guardada = action.payload
+        state.loading = false
         const index = state.items.findIndex((categoria) => categoria.id === guardada.id)
         if (index !== -1) state.items[index] = guardada
         state.items
@@ -64,7 +70,9 @@ const categoriaSlice = createSlice({
           })
       })
       .addCase(updateCategoria.rejected, guardarError)
+      .addCase(deleteCategoria.pending, cargando)
       .addCase(deleteCategoria.fulfilled, (state, action) => {
+        state.loading = false
         state.items = state.items.filter((categoria) => categoria.id !== action.payload)
       })
       .addCase(deleteCategoria.rejected, guardarError)

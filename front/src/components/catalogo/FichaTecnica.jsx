@@ -9,16 +9,16 @@ const CAMPOS = [
 
 function FichaTecnica({ ficha }) {
   if (!ficha) return null
-  const conDato = CAMPOS.filter((c) => ficha[c.campo])
+  const conDato = CAMPOS.filter((dato) => ficha[dato.campo])
 
   return (
     <table className="ficha">
       <caption>Ficha técnica</caption>
       <tbody>
-        {conDato.map((c) => (
-          <tr key={c.campo}>
-            <th>{c.etiqueta}</th>
-            <td>{`${ficha[c.campo]} ${c.unidad}`}</td>
+        {conDato.map((dato) => (
+          <tr key={dato.campo}>
+            <th>{dato.etiqueta}</th>
+            <td>{`${ficha[dato.campo]} ${dato.unidad}`}</td>
           </tr>
         ))}
       </tbody>

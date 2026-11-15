@@ -14,6 +14,7 @@ function CurvaDyno() {
             {rpm}
           </text>
         ))}
+        <line className="curva-barrido" x1="30" x2="30" y1="20" y2="192" />
         <path className="curva curva-torque" d={TORQUE} pathLength="1" />
         <path className="curva curva-potencia" d={POTENCIA} pathLength="1" />
       </svg>

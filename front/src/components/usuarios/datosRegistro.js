@@ -12,7 +12,11 @@ export function validarRegistro(datos) {
   if (datos.nombre.trim() === '') errores.nombre = 'El nombre es obligatorio'
   if (datos.apellido.trim() === '') errores.apellido = 'El apellido es obligatorio'
   if (!datos.email.includes('@')) errores.email = 'Ingresá un mail válido'
-  if (datos.username.trim().length < 4) errores.username = 'Mínimo 4 caracteres'
+  const usuario = datos.username.trim()
+  if (usuario.length < 4) errores.username = 'Mínimo 4 caracteres'
+  else if (!/^[a-zA-Z0-9._-]+$/.test(usuario)) {
+    errores.username = 'Solo letras, números, punto, guion y guion bajo'
+  }
   if (datos.password.length < 6) errores.password = 'Mínimo 6 caracteres'
   return errores
 }

@@ -7,12 +7,12 @@ export function useEleccionTurno(bancos) {
   const [fecha, setFecha] = useState(null)
   const [hora, setHora] = useState(null)
   const lista = bancos || []
-  const primeroQueAdmite = (tipo) => lista.find((b) => admite(b, tipo)) || lista[0]
-  const banco = lista.find((b) => b.id === bancoId) || primeroQueAdmite(vehiculo)
+  const primeroQueAdmite = (tipo) => lista.find((opcion) => admite(opcion, tipo)) || lista[0]
+  const banco = lista.find((opcion) => opcion.id === bancoId) || primeroQueAdmite(vehiculo)
 
   function elegirVehiculo(nuevo) {
     setVehiculo(nuevo)
-    if (banco && !admite(banco, nuevo)) setBancoId(primeroQueAdmite(nuevo).id)
+    if (banco && !admite(banco, nuevo)) elegirBanco(primeroQueAdmite(nuevo).id)
   }
 
   function elegirBanco(id) {

@@ -1,6 +1,5 @@
-import { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { Link, useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import Aviso from '../components/Aviso'
 import Cargando from '../components/Cargando'
 import CarritoVacio from '../components/carrito/CarritoVacio'
@@ -9,24 +8,21 @@ import CanjePuntos from '../components/pago/CanjePuntos'
 import DireccionEnvio from '../components/pago/DireccionEnvio'
 import ElegirMetodo from '../components/pago/ElegirMetodo'
 import ResumenPago from '../components/pago/ResumenPago'
+import { useDatosCheckout } from '../components/pago/useDatosCheckout'
 import { useEleccionPago } from '../components/pago/useEleccionPago'
-import { fetchCarrito, limpiarError } from '../redux/carritoSlice'
-import { fetchPerfil } from '../redux/usuarioSlice'
+import { limpiarError } from '../redux/carritoSlice'
 
 function CheckoutView() {
   const dispatch = useDispatch()
-  const carrito = useSelector((state) => state.carrito)
-  const sesion = useSelector((state) => state.usuario.sesion)
-  const eleccion = useEleccionPago(carrito.total)
+  const { carrito, puntos } = useDatosCheckout()
+  const { state } = useLocation()
+  const eleccion = useEleccionPago(carrito.total, state)
   const navigate = useNavigate()
-
-  useEffect(() => {
-    dispatch(fetchPerfil())
-    if (!carrito.cargado) dispatch(fetchCarrito())
-  }, [dispatch, carrito.cargado])
 
   if (!carrito.cargado) return carrito.error ? <Aviso mensaje={carrito.error} /> : <Cargando />
   if (carrito.items.length === 0) return <CarritoVacio titulo="Confirmar compra" />
+  if (carrito.items.some((item) => !item.hayStockSuficiente))
+    return <Navigate to="/carrito" replace />
 
   return (
     <section>
@@ -44,7 +40,7 @@ function CheckoutView() {
             onCuotas={eleccion.setCuotas}
           />
           <CanjePuntos
-            puntos={sesion ? sesion.puntos : 0}
+            puntos={puntos}
             usarPuntos={eleccion.usarPuntos}
             onCambiar={eleccion.setUsarPuntos}
           />

@@ -1,11 +1,12 @@
 import { useState } from 'react'
+import TicketTurno from './TicketTurno'
 import { nombreVehiculo } from './vehiculos'
-import { fechaLarga } from '../../utils/fechas'
 
 function FormTurno({ eleccion, enviando, onReservar }) {
   const { banco, bloqueado, vehiculo, fecha, hora } = eleccion
   const [modelo, setModelo] = useState('')
   const [comentario, setComentario] = useState('')
+  const [cotizarVtv, setCotizarVtv] = useState(false)
   const [falta, setFalta] = useState(null)
 
   function enviar(e) {
@@ -14,7 +15,7 @@ function FormTurno({ eleccion, enviando, onReservar }) {
     if (!fecha || !hora) return setFalta('Elegí el día y el horario')
     if (modelo.trim() === '') return setFalta('Contanos la marca y el modelo')
     setFalta(null)
-    onReservar({ modeloVehiculo: modelo.trim(), comentario: comentario.trim() })
+    onReservar({ modeloVehiculo: modelo.trim(), comentario: comentario.trim(), cotizarVtv })
   }
 
   return (
@@ -38,23 +39,27 @@ function FormTurno({ eleccion, enviando, onReservar }) {
           onChange={(e) => setComentario(e.target.value)}
         />
       </label>
-      <div className="ticket-turno">
-        <p>
-          <span>Banco</span>
-          <strong>{banco.nombre}</strong>
-        </p>
-        <p>
-          <span>Día</span>
-          <strong>{fecha ? fechaLarga(fecha) : 'Elegí en el calendario'}</strong>
-        </p>
-        <p>
-          <span>Horario</span>
-          <strong>{hora || '—'}</strong>
-        </p>
-      </div>
+      <label className="opcion-vtv">
+        <input
+          type="checkbox"
+          checked={cotizarVtv}
+          onChange={(e) => setCotizarVtv(e.target.checked)}
+        />
+        <span>
+          <strong>Mi VTV no está al día</strong>
+          Te la cotizamos en el taller el día del turno.
+        </span>
+      </label>
+      <TicketTurno
+        banco={banco.nombre}
+        fecha={fecha}
+        hora={hora}
+        vehiculo={vehiculo}
+        modelo={modelo}
+      />
       {falta && <p className="campo-error">{falta}</p>}
       <button className="boton boton-grande" disabled={enviando}>
-        {enviando ? 'Reservando…' : 'Confirmar turno'}
+        {enviando ? 'Un momento…' : 'Confirmar turno'}
       </button>
     </form>
   )

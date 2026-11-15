@@ -5,11 +5,15 @@ import { admite } from './vehiculos'
 function GarajeBancos({ bancos, bancoId, vehiculo, onElegir }) {
   const indice = Math.max(
     0,
-    bancos.findIndex((b) => b.id === bancoId),
+    bancos.findIndex((opcion) => opcion.id === bancoId),
   )
   const banco = bancos[indice]
-  const claseMiniatura = (b) =>
-    ['miniatura-banco', b.id === banco.id && 'activa', !admite(b, vehiculo) && 'bloqueada']
+  const claseMiniatura = (opcion) =>
+    [
+      'miniatura-banco',
+      opcion.id === banco.id && 'activa',
+      !admite(opcion, vehiculo) && 'bloqueada',
+    ]
       .filter(Boolean)
       .join(' ')
   const mover = (paso) => onElegir(bancos[(indice + paso + bancos.length) % bancos.length].id)
@@ -24,16 +28,20 @@ function GarajeBancos({ bancos, bancoId, vehiculo, onElegir }) {
         onSiguiente={() => mover(1)}
       />
       <div className="tira-bancos">
-        {bancos.map((b) => (
+        {bancos.map((opcion) => (
           <button
-            key={b.id}
+            key={opcion.id}
             type="button"
-            title={b.nombre}
-            className={claseMiniatura(b)}
-            onClick={() => onElegir(b.id)}
+            title={opcion.nombre}
+            className={claseMiniatura(opcion)}
+            onClick={() => onElegir(opcion.id)}
           >
-            <FotoProducto ruta={b.imagen} nombre={b.nombre} />
-            {!admite(b, vehiculo) && <span className="mini-candado">🔒</span>}
+            <FotoProducto ruta={opcion.imagen} nombre={opcion.nombre} />
+            {!admite(opcion, vehiculo) && (
+              <span className="mini-candado" aria-hidden="true">
+                🔒
+              </span>
+            )}
           </button>
         ))}
       </div>

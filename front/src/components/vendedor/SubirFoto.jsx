@@ -7,9 +7,14 @@ function SubirFoto({ onSubir }) {
   }
 
   return (
-    <label className="boton-accion">
+    <label className="boton-accion subir-archivo">
       Agregar foto
-      <input type="file" accept={TIPOS_DE_FOTO.join(',')} hidden onChange={elegir} />
+      <input
+        type="file"
+        className="visualmente-oculto"
+        accept={TIPOS_DE_FOTO.join(',')}
+        onChange={elegir}
+      />
     </label>
   )
 }

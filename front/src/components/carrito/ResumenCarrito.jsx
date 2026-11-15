@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import Modal from '../Modal'
 import { formatearPrecio } from '../../utils/formato'
 
-function ResumenCarrito({ carrito, onVaciar }) {
+function ResumenCarrito({ carrito, ocupado, onVaciar }) {
   const [confirmando, setConfirmando] = useState(false)
   const faltaStock = carrito.items.some((item) => !item.hayStockSuficiente)
   const productos = carrito.items.length
@@ -31,7 +31,11 @@ function ResumenCarrito({ carrito, onVaciar }) {
           Ir a pagar
         </Link>
       )}
-      <button className="boton boton-secundario" onClick={() => setConfirmando(true)}>
+      <button
+        className="boton boton-secundario"
+        disabled={ocupado}
+        onClick={() => setConfirmando(true)}
+      >
         Vaciar carrito
       </button>
       {confirmando && (

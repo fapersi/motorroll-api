@@ -1,4 +1,4 @@
-function FilaUsuario({ usuario, esYo, onRol, onEstado, onEliminar }) {
+function FilaUsuario({ usuario, esYo, ocupado, onRol, onEstado, onEliminar }) {
   return (
     <tr>
       <td>
@@ -9,13 +9,14 @@ function FilaUsuario({ usuario, esYo, onRol, onEstado, onEliminar }) {
       <td>
         <select
           className="selector-rol"
+          aria-label={`Rol de ${usuario.username}`}
           value={usuario.rol}
-          disabled={esYo}
-          onChange={(e) => onRol(usuario.id, e.target.value)}
+          disabled={esYo || ocupado}
+          onChange={(e) => onRol(usuario, e.target.value)}
         >
-          <option value="COMPRADOR">COMPRADOR</option>
-          <option value="VENDEDOR">VENDEDOR</option>
-          <option value="ADMIN">ADMIN</option>
+          <option value="COMPRADOR">Comprador</option>
+          <option value="VENDEDOR">Vendedor</option>
+          <option value="ADMIN">Administrador</option>
         </select>
       </td>
       <td className="celda-centrada">
@@ -29,14 +30,14 @@ function FilaUsuario({ usuario, esYo, onRol, onEstado, onEliminar }) {
         <div className="acciones-fila">
           <button
             className={usuario.activo ? 'boton-accion' : 'boton-accion boton-accion-verde'}
-            disabled={esYo}
+            disabled={esYo || ocupado}
             onClick={() => onEstado(usuario.id, !usuario.activo)}
           >
             {usuario.activo ? 'Deshabilitar' : 'Habilitar'}
           </button>
           <button
             className="boton-accion boton-accion-rojo"
-            disabled={esYo || usuario.rol === 'ADMIN'}
+            disabled={esYo || ocupado || usuario.rol === 'ADMIN'}
             onClick={() => onEliminar(usuario)}
           >
             Eliminar

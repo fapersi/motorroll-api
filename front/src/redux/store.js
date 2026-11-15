@@ -6,6 +6,9 @@ import carritoReducer from './carritoSlice'
 import ordenReducer from './ordenSlice'
 import resenaReducer from './resenaSlice'
 import turnoReducer from './turnoSlice'
+import temaReducer from './temaSlice'
+import tiendaReducer from './tiendaSlice'
+import notificacionReducer from './notificacionSlice'
 
 export const store = configureStore({
   reducer: {
@@ -16,5 +19,8 @@ export const store = configureStore({
     ordenes: ordenReducer,
     resenas: resenaReducer,
     turnos: turnoReducer,
+    tema: temaReducer,
+    tiendas: tiendaReducer,
+    notificaciones: notificacionReducer,
   },
 })

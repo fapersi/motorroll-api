@@ -1,25 +1,28 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { api } from '../utils/api'
+import { aResumen, descontarStock } from '../utils/resumenProducto'
 import { checkout } from './carritoSlice'
 import { createResena } from './resenaSlice'
 import { login, registrar, sesionCerrada } from './usuarioSlice'
 
-const SIN_FILTROS = { texto: '', categoriaId: '', precioMin: '', precioMax: '', ordenarPor: '' }
+const SIN_FILTROS = { texto: '', categorias: [], precioMin: '', precioMax: '', ordenarPor: '' }
 
 async function subirFotos(producto, fotos) {
-  const subidas = fotos.map((foto) => {
+  const nuevas = []
+  for (const foto of fotos) {
     const formulario = new FormData()
     formulario.append('imagen', foto)
-    return api.post(`/api/productos/${producto.id}/imagenes`, formulario)
-  })
-  const respuestas = await Promise.all(subidas)
-  const nuevas = respuestas.map((respuesta) => respuesta.data)
+    const { data } = await api.post(`/api/productos/${producto.id}/imagenes`, formulario)
+    nuevas.push(data)
+  }
   return { ...producto, imagenes: [...producto.imagenes, ...nuevas] }
 }
 
 export const fetchProductos = createAsyncThunk('productos/fetchProductos', async (filtros) => {
-  const elegidos = Object.entries(filtros).filter(([, valor]) => valor !== '')
-  const { data } = await api.get('/api/productos', { params: Object.fromEntries(elegidos) })
+  const { categorias, ...resto } = filtros
+  const params = Object.fromEntries(Object.entries(resto).filter(([, valor]) => valor !== ''))
+  if (categorias.length > 0) params.categoriaId = categorias.join(',')
+  const { data } = await api.get('/api/productos', { params })
   return data
 })
 
@@ -66,9 +69,9 @@ export const addFoto = createAsyncThunk('productos/addFoto', async ({ producto, 
   return subirFotos(producto, [foto])
 })
 
-export const deleteProducto = createAsyncThunk('productos/deleteProducto', async (id) => {
-  await api.delete(`/api/productos/${id}`)
-  return id
+export const deleteProducto = createAsyncThunk('productos/deleteProducto', async (producto) => {
+  await api.delete(`/api/productos/${producto.id}`)
+  return { id: producto.id, vendedor: producto.vendedor }
 })
 
 const initialState = {
@@ -92,17 +95,22 @@ const guardarError = (state, action) => {
   state.error = action.error.message
 }
 
-const publicacionModificada = (state, action) => {
-  const index = state.mios.findIndex((producto) => producto.id === action.payload.id)
-  if (index !== -1) state.mios[index] = action.payload
-  state.loading = false
-  state.filtrosCargados = null
-  state.detalle = null
-}
+const sinFiltros = (filtros) =>
+  filtros !== null &&
+  filtros.texto === '' &&
+  filtros.categorias.length === 0 &&
+  filtros.precioMin === '' &&
+  filtros.precioMax === '' &&
+  filtros.ordenarPor === ''
 
-const descontarStock = (producto, vendidos) => {
-  producto.stock = producto.stock - vendidos
-  producto.hayStock = producto.stock > 0
+const publicacionModificada = (state, action) => {
+  const producto = action.payload
+  state.loading = false
+  const index = state.mios.findIndex((mio) => mio.id === producto.id)
+  if (index !== -1) state.mios[index] = producto
+  const enCatalogo = state.items.findIndex((item) => item.id === producto.id)
+  if (enCatalogo !== -1) state.items[enCatalogo] = aResumen(producto)
+  if (state.detalle !== null && state.detalle.id === producto.id) state.detalle = producto
 }
 
 const productoSlice = createSlice({
@@ -110,7 +118,10 @@ const productoSlice = createSlice({
   initialState,
   reducers: {
     cambiarFiltros: (state, action) => {
-      state.filtros = action.payload
+      const cambio = Object.keys(action.payload).some(
+        (clave) => String(action.payload[clave]) !== String(state.filtros[clave]),
+      )
+      if (cambio) state.filtros = action.payload
     },
     limpiarError: (state) => {
       state.error = null
@@ -146,23 +157,31 @@ const productoSlice = createSlice({
       .addCase(createProducto.fulfilled, (state, action) => {
         state.loading = false
         state.mios = [action.payload, ...state.mios]
-        state.filtrosCargados = null
+        if (sinFiltros(state.filtrosCargados)) {
+          state.items = [aResumen(action.payload), ...state.items]
+        }
       })
       .addCase(createProducto.rejected, guardarError)
       .addCase(updateProducto.pending, cargando)
       .addCase(updateProducto.fulfilled, publicacionModificada)
       .addCase(updateProducto.rejected, guardarError)
+      .addCase(updateStock.pending, cargando)
       .addCase(updateStock.fulfilled, publicacionModificada)
       .addCase(updateStock.rejected, guardarError)
+      .addCase(updateDescuento.pending, cargando)
       .addCase(updateDescuento.fulfilled, publicacionModificada)
       .addCase(updateDescuento.rejected, guardarError)
+      .addCase(addFoto.pending, cargando)
       .addCase(addFoto.fulfilled, publicacionModificada)
       .addCase(addFoto.rejected, guardarError)
+      .addCase(deleteProducto.pending, cargando)
       .addCase(deleteProducto.fulfilled, (state, action) => {
-        const index = state.mios.findIndex((producto) => producto.id === action.payload)
+        state.loading = false
+        const { id } = action.payload
+        const index = state.mios.findIndex((producto) => producto.id === id)
         if (index !== -1) state.mios[index].activo = false
-        state.items = state.items.filter((producto) => producto.id !== action.payload)
-        state.detalle = null
+        state.items = state.items.filter((producto) => producto.id !== id)
+        if (state.detalle !== null && state.detalle.id === id) state.detalle = null
       })
       .addCase(deleteProducto.rejected, guardarError)
       .addCase(checkout.fulfilled, (state, action) => {
@@ -175,11 +194,15 @@ const productoSlice = createSlice({
         })
       })
       .addCase(createResena.fulfilled, (state, action) => {
+        const opinado = state.items.find((item) => item.id === action.meta.arg.productoId)
+        if (opinado) {
+          opinado.calificacion = action.payload.promedio
+          opinado.cantidadResenas = action.payload.cantidad
+        }
         if (state.detalle) {
           state.detalle.calificacion = action.payload.promedio
           state.detalle.cantidadResenas = action.payload.cantidad
         }
-        state.filtrosCargados = null
       })
       .addCase(login.fulfilled, (state) => {
         state.mios = []

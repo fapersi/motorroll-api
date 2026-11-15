@@ -6,11 +6,12 @@ function RutaPrivada({ roles, children }) {
   const location = useLocation()
 
   if (!usuario) {
-    return <Navigate to="/login" state={{ desde: location.pathname }} />
+    const aviso = 'Ingresá o creá tu cuenta gratis para seguir.'
+    return <Navigate to="/login" state={{ desde: location.pathname, aviso }} replace />
   }
 
   if (roles && !roles.includes(usuario.rol)) {
-    return <Navigate to="/sin-permiso" />
+    return <Navigate to="/sin-permiso" replace />
   }
 
   return children

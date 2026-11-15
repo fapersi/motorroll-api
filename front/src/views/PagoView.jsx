@@ -7,12 +7,22 @@ import PagoSinTarjeta from '../components/pago/PagoSinTarjeta'
 import { usePago } from '../components/pago/usePago'
 import { formatearPrecio } from '../utils/formato'
 
+function armarPedido(datos) {
+  return {
+    metodoPago: datos.metodoPago,
+    cuotas: datos.cuotas,
+    usarPuntos: datos.usarPuntos,
+    direccionEnvio: datos.direccionEnvio,
+  }
+}
+
 function PagoView() {
   const { state } = useLocation()
-  const pedido = state ? { ...state, pago: undefined } : null
-  const pago = usePago(pedido)
+  const pago = usePago(state ? armarPedido(state) : null)
 
   if (!state) return <Navigate to="/checkout" replace />
+
+  const orden = state.orden || null
 
   const esTarjeta = state.metodoPago.startsWith('TARJETA')
   const textoBoton = `Pagar ${formatearPrecio(state.pago.aPagar)}`
@@ -25,24 +35,25 @@ function PagoView() {
         cuotas={state.cuotas}
       />
       <Aviso mensaje={pago.error} onCerrar={pago.cerrarError} />
-      {pago.procesando && <EstadoPago orden={pago.orden} />}
-      {!pago.procesando && esTarjeta && (
+      {pago.error && (
+        <Link to="/carrito" className="boton boton-secundario">
+          Revisar mi carrito
+        </Link>
+      )}
+      {(orden || (pago.procesando && !esTarjeta)) && <EstadoPago orden={orden} />}
+      {!orden && esTarjeta && (
         <FormTarjeta
           esCredito={state.metodoPago === 'TARJETA_CREDITO'}
           textoBoton={textoBoton}
+          procesando={pago.procesando}
           onPagar={pago.pagar}
         />
       )}
-      {!pago.procesando && !esTarjeta && (
-        <PagoSinTarjeta
-          metodoPago={state.metodoPago}
-          referencia={Math.round(state.pago.aPagar)}
-          textoBoton={textoBoton}
-          onPagar={pago.pagar}
-        />
+      {!pago.procesando && !orden && !esTarjeta && (
+        <PagoSinTarjeta metodoPago={state.metodoPago} onPagar={pago.pagar} />
       )}
-      {!pago.procesando && (
-        <Link to="/checkout" className="pasarela-volver">
+      {!pago.procesando && !orden && (
+        <Link to="/checkout" state={state} className="pasarela-volver">
           ← Cambiar método de pago
         </Link>
       )}

@@ -1,3 +1,4 @@
+import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import CurvaDyno from './CurvaDyno'
 import banco from '../../assets/banco-rodillos.jpg'
@@ -9,6 +10,9 @@ const VENTAJAS = [
 ]
 
 function Portada() {
+  const usuario = useSelector((state) => state.usuario.sesion)
+  const puedeProbar = !usuario || usuario.rol === 'COMPRADOR'
+
   return (
     <>
       <section className="portada" style={{ backgroundImage: `url(${banco})` }}>
@@ -21,9 +25,11 @@ function Portada() {
             <a href="#catalogo" className="boton boton-grande">
               Ver catálogo
             </a>
-            <Link to="/turnos" className="boton boton-grande boton-secundario">
-              Probá un banco
-            </Link>
+            {puedeProbar && (
+              <Link to="/turnos" className="boton boton-grande boton-secundario">
+                Probá un banco
+              </Link>
+            )}
           </div>
         </div>
         <CurvaDyno />

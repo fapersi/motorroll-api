@@ -1,5 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { api } from '../utils/api'
+import { checkout } from './carritoSlice'
+import { login, registrar, sesionCerrada } from './usuarioSlice'
 
 export const fetchResenas = createAsyncThunk('resenas/fetchResenas', async (productoId) => {
   const { data } = await api.get(`/api/productos/${productoId}/resenas`)
@@ -14,10 +16,15 @@ export const createResena = createAsyncThunk(
   },
 )
 
-const guardarResumen = (state, action) => {
+const guardarResumen = (state, resumen, productoId) => {
   state.loading = false
-  state.resumen = action.payload
-  state.productoId = action.meta.arg.productoId || action.meta.arg
+  state.resumen = resumen
+  state.productoId = productoId
+}
+
+const sinCache = (state) => {
+  state.resumen = null
+  state.productoId = null
 }
 
 const guardarError = (state, action) => {
@@ -40,10 +47,25 @@ const resenaSlice = createSlice({
         state.error = null
         state.resumen = null
       })
-      .addCase(fetchResenas.fulfilled, guardarResumen)
+      .addCase(fetchResenas.fulfilled, (state, action) => {
+        guardarResumen(state, action.payload, action.meta.arg)
+      })
       .addCase(fetchResenas.rejected, guardarError)
-      .addCase(createResena.fulfilled, guardarResumen)
+      .addCase(createResena.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(createResena.fulfilled, (state, action) => {
+        guardarResumen(state, action.payload, action.meta.arg.productoId)
+      })
       .addCase(createResena.rejected, guardarError)
+      .addCase(checkout.fulfilled, (state, action) => {
+        const comprado = action.payload.items.some((item) => item.productoId === state.productoId)
+        if (comprado && state.resumen !== null) state.resumen.puedeOpinar = true
+      })
+      .addCase(login.fulfilled, sinCache)
+      .addCase(registrar.fulfilled, sinCache)
+      .addCase(sesionCerrada, sinCache)
   },
 })
 

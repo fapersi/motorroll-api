@@ -8,13 +8,18 @@ function Filtros({ filtros, categorias, onCambiar }) {
 
   return (
     <section className="filtros">
-      <Buscador texto={filtros.texto} onBuscar={(texto) => cambiar({ texto })} />
+      <Buscador
+        key={filtros.texto}
+        texto={filtros.texto}
+        onBuscar={(texto) => cambiar({ texto })}
+      />
       <FiltroCategoria
-        valor={filtros.categoriaId}
+        elegidas={filtros.categorias}
         categorias={categorias}
-        onElegir={(categoriaId) => cambiar({ categoriaId })}
+        onCambiar={(elegidas) => cambiar({ categorias: elegidas })}
       />
       <FiltroPrecio
+        key={`${filtros.precioMin}-${filtros.precioMax}`}
         minimo={filtros.precioMin}
         maximo={filtros.precioMax}
         onAplicar={(precioMin, precioMax) => cambiar({ precioMin, precioMax })}

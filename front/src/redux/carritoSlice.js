@@ -2,10 +2,14 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { api } from '../utils/api'
 import { login, registrar, sesionCerrada } from './usuarioSlice'
 
-export const fetchCarrito = createAsyncThunk('carrito/fetchCarrito', async () => {
-  const { data } = await api.get('/api/carrito')
-  return data
-})
+export const fetchCarrito = createAsyncThunk(
+  'carrito/fetchCarrito',
+  async () => {
+    const { data } = await api.get('/api/carrito')
+    return data
+  },
+  { condition: (_, { getState }) => !getState().carrito.loading },
+)
 
 export const addItem = createAsyncThunk('carrito/addItem', async (productoId) => {
   const { data } = await api.post('/api/carrito/items', { productoId, cantidad: 1 })
@@ -35,7 +39,19 @@ export const checkout = createAsyncThunk('carrito/checkout', async (pago) => {
   return data
 })
 
-const initialState = { items: [], total: 0, cargado: false, loading: false, error: null }
+const initialState = {
+  items: [],
+  total: 0,
+  cargado: false,
+  loading: false,
+  error: null,
+  errorPago: null,
+}
+
+const cargando = (state) => {
+  state.loading = true
+  state.error = null
+}
 
 const guardarCarrito = (state, action) => {
   state.loading = false
@@ -55,29 +71,40 @@ const carritoSlice = createSlice({
   reducers: {
     limpiarError: (state) => {
       state.error = null
+      state.errorPago = null
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchCarrito.pending, (state) => {
-        state.loading = true
-        state.error = null
-      })
+      .addCase(fetchCarrito.pending, cargando)
       .addCase(fetchCarrito.fulfilled, guardarCarrito)
       .addCase(fetchCarrito.rejected, guardarError)
+      .addCase(addItem.pending, cargando)
       .addCase(addItem.fulfilled, guardarCarrito)
       .addCase(addItem.rejected, guardarError)
+      .addCase(updateCantidad.pending, cargando)
       .addCase(updateCantidad.fulfilled, guardarCarrito)
       .addCase(updateCantidad.rejected, guardarError)
+      .addCase(removeItem.pending, cargando)
       .addCase(removeItem.fulfilled, guardarCarrito)
       .addCase(removeItem.rejected, guardarError)
+      .addCase(clearCarrito.pending, cargando)
       .addCase(clearCarrito.fulfilled, guardarCarrito)
       .addCase(clearCarrito.rejected, guardarError)
+      .addCase(checkout.pending, (state) => {
+        state.loading = true
+        state.errorPago = null
+      })
       .addCase(checkout.fulfilled, (state) => {
+        state.loading = false
         state.items = []
         state.total = 0
       })
-      .addCase(checkout.rejected, guardarError)
+      .addCase(checkout.rejected, (state, action) => {
+        state.loading = false
+        state.errorPago = action.error.message
+        state.cargado = false
+      })
       .addCase(login.fulfilled, () => initialState)
       .addCase(registrar.fulfilled, () => initialState)
       .addCase(sesionCerrada, () => initialState)

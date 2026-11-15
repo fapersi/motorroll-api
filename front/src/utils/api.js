@@ -14,7 +14,11 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (respuesta) => respuesta,
-  (error) => Promise.reject(new Error(mensajeDeError(error))),
+  (error) => {
+    const falla = new Error(mensajeDeError(error))
+    falla.code = error.response ? String(error.response.status) : 'SIN_RED'
+    return Promise.reject(falla)
+  },
 )
 
 function mensajeDeError(error) {
@@ -23,9 +27,9 @@ function mensajeDeError(error) {
     borrarSesion()
     return SESION_VENCIDA
   }
-  const datos = error.response.data
+  const datos = error.response.data || {}
   if (datos.errores) return Object.values(datos.errores).join('. ')
-  return datos.mensaje
+  return datos.mensaje || 'Algo salió mal. Probá de nuevo en unos segundos.'
 }
 
 export function urlImagen(ruta) {

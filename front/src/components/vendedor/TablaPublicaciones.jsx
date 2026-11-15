@@ -30,7 +30,7 @@ function TablaPublicaciones({ productos, onEditar }) {
             onStock={(stock) => dispatch(updateStock({ id: producto.id, stock }))}
             onDescuento={(descuento) => dispatch(updateDescuento({ id: producto.id, descuento }))}
             onFoto={(foto) => dispatch(addFoto({ producto, foto }))}
-            onBaja={() => dispatch(deleteProducto(producto.id))}
+            onBaja={() => dispatch(deleteProducto(producto))}
           />
         ))}
       </tbody>

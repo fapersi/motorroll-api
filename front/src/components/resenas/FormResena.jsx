@@ -2,7 +2,7 @@ import { useState } from 'react'
 import Aviso from '../Aviso'
 import ElegirEstrellas from './ElegirEstrellas'
 
-function FormResena({ onEnviar, error, onCerrarError }) {
+function FormResena({ onEnviar, enviando, error, onCerrarError }) {
   const [estrellas, setEstrellas] = useState(0)
   const [comentario, setComentario] = useState('')
   const [incompleto, setIncompleto] = useState(null)
@@ -21,6 +21,7 @@ function FormResena({ onEnviar, error, onCerrarError }) {
       <ElegirEstrellas valor={estrellas} onElegir={setEstrellas} />
       <textarea
         rows="3"
+        aria-label="Tu opinión"
         maxLength="1000"
         placeholder="Contá tu experiencia con el equipo"
         value={comentario}
@@ -28,7 +29,9 @@ function FormResena({ onEnviar, error, onCerrarError }) {
       />
       {incompleto && <p className="campo-error">{incompleto}</p>}
       <Aviso mensaje={error} onCerrar={onCerrarError} />
-      <button className="boton">Publicar opinión</button>
+      <button className="boton" disabled={enviando}>
+        {enviando ? 'Publicando…' : 'Publicar opinión'}
+      </button>
     </form>
   )
 }

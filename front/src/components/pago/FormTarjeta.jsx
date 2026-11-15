@@ -5,7 +5,7 @@ import { formatearNumero, formatearVencimiento, TARJETA_VACIA, validarTarjeta } 
 
 const FORMATOS = { numero: formatearNumero, vencimiento: formatearVencimiento }
 
-function FormTarjeta({ esCredito, textoBoton, onPagar }) {
+function FormTarjeta({ esCredito, textoBoton, procesando, onPagar }) {
   const [datos, setDatos] = useState(TARJETA_VACIA)
   const [errores, setErrores] = useState({})
 
@@ -59,7 +59,9 @@ function FormTarjeta({ esCredito, textoBoton, onPagar }) {
       <p className="nota-segura">
         🔒 Es una simulación: los datos de la tarjeta no se guardan ni se envían.
       </p>
-      <button className="boton boton-grande">{textoBoton}</button>
+      <button className="boton boton-grande" disabled={procesando}>
+        {procesando ? 'Procesando el pago…' : textoBoton}
+      </button>
     </form>
   )
 }

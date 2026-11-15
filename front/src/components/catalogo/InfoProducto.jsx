@@ -2,6 +2,7 @@ import AgregarAlCarrito from './AgregarAlCarrito'
 import FichaTecnica from './FichaTecnica'
 import PrecioProducto from './PrecioProducto'
 import Calificacion from '../resenas/Calificacion'
+import SelloTienda from '../tiendas/SelloTienda'
 
 function InfoProducto({ producto }) {
   return (
@@ -17,7 +18,7 @@ function InfoProducto({ producto }) {
       {!producto.hayStock && <p className="sin-stock">Sin stock</p>}
       <AgregarAlCarrito producto={producto} />
       <p>{producto.descripcion}</p>
-      <p className="detalle-vendedor">Vendido por {producto.vendedor}</p>
+      <SelloTienda vendedor={producto.vendedor} />
       <FichaTecnica ficha={producto.fichaTecnica} />
     </div>
   )

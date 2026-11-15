@@ -13,7 +13,8 @@ function ElegirEstrellas({ valor, onElegir }) {
           key={numero}
           type="button"
           className={numero <= mostrado ? 'estrella-boton activa' : 'estrella-boton'}
-          aria-label={`${numero} estrellas`}
+          aria-label={numero === 1 ? '1 estrella' : `${numero} estrellas`}
+          aria-pressed={numero === valor}
           onMouseEnter={() => setEncima(numero)}
           onClick={() => onElegir(numero)}
         >

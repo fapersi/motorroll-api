@@ -28,16 +28,22 @@ function SeccionResenas({ productoId }) {
 
   const esComprador = usuario !== null && usuario.rol === 'COMPRADOR'
   const opiniones = resenas.resumen.resenas
-  const yaOpino = esComprador && opiniones.some((r) => r.autorUsername === usuario.username)
+  const yaOpino =
+    esComprador && opiniones.some((opinion) => opinion.autorUsername === usuario.username)
+  const puedeOpinar = esComprador && !yaOpino && resenas.resumen.puedeOpinar
 
   return (
     <section className="seccion-resenas">
       <h2>Opiniones del producto</h2>
       <ResumenResenas resumen={resenas.resumen} />
       <Aviso mensaje={gracias} tipo="exito" onCerrar={() => setGracias(null)} />
-      {esComprador && !yaOpino && (
+      {esComprador && !yaOpino && !puedeOpinar && (
+        <p className="nota-resena">Pueden opinar los talleres que compraron este equipo.</p>
+      )}
+      {puedeOpinar && (
         <FormResena
           onEnviar={publicar}
+          enviando={resenas.loading}
           error={resenas.error}
           onCerrarError={() => dispatch(limpiarError())}
         />

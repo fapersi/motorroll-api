@@ -12,10 +12,12 @@ import {
   removeItem,
   updateCantidad,
 } from '../redux/carritoSlice'
+import { useLimpiarAlSalir } from '../hooks/useLimpiarAlSalir'
 
 function CarritoView() {
   const dispatch = useDispatch()
   const carrito = useSelector((state) => state.carrito)
+  useLimpiarAlSalir(limpiarError)
 
   useEffect(() => {
     if (!carrito.cargado) dispatch(fetchCarrito())
@@ -35,12 +37,17 @@ function CarritoView() {
             <ItemCarrito
               key={item.id}
               item={item}
+              ocupado={carrito.loading}
               onCantidad={(cantidad) => dispatch(updateCantidad({ itemId: item.id, cantidad }))}
               onQuitar={() => dispatch(removeItem(item.id))}
             />
           ))}
         </ul>
-        <ResumenCarrito carrito={carrito} onVaciar={() => dispatch(clearCarrito())} />
+        <ResumenCarrito
+          carrito={carrito}
+          ocupado={carrito.loading}
+          onVaciar={() => dispatch(clearCarrito())}
+        />
       </div>
     </section>
   )

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import SelectorPadre from './SelectorPadre'
 
 function FormCategoria({ categoria, categorias, onEnviar, onCancelar }) {
   const [datos, setDatos] = useState({
@@ -38,19 +39,12 @@ function FormCategoria({ categoria, categorias, onEnviar, onCancelar }) {
         Descripción
         <input name="descripcion" value={datos.descripcion} onChange={cambiar} />
       </label>
-      <label className="campo">
-        Categoría padre
-        <select name="categoriaPadreId" value={datos.categoriaPadreId} onChange={cambiar}>
-          <option value="">Ninguna</option>
-          {categorias
-            .filter((c) => !c.categoriaPadreId && c.id !== categoria?.id)
-            .map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.nombre}
-              </option>
-            ))}
-        </select>
-      </label>
+      <SelectorPadre
+        categoria={categoria}
+        categorias={categorias}
+        value={datos.categoriaPadreId}
+        onChange={cambiar}
+      />
       <button className="boton">{categoria ? 'Guardar cambios' : 'Agregar'}</button>
       {categoria && (
         <button type="button" className="boton boton-secundario" onClick={onCancelar}>

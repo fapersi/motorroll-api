@@ -1,11 +1,19 @@
-function Aviso({ mensaje, tipo = 'error', onCerrar }) {
+function Aviso({ mensaje, tipo = 'error', flotante = false, accion, onCerrar }) {
   if (!mensaje) return null
 
   return (
-    <div className={`aviso aviso-${tipo}`}>
+    <div
+      className={flotante ? `aviso aviso-${tipo} aviso-flotante` : `aviso aviso-${tipo}`}
+      role={tipo === 'error' ? 'alert' : 'status'}
+    >
       <p>{mensaje}</p>
+      {accion && (
+        <button type="button" className="boton boton-chico" onClick={accion.onClick}>
+          {accion.texto}
+        </button>
+      )}
       {onCerrar && (
-        <button className="aviso-cerrar" onClick={onCerrar}>
+        <button type="button" className="aviso-cerrar" aria-label="Cerrar aviso" onClick={onCerrar}>
           ✕
         </button>
       )}

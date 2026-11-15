@@ -2,32 +2,23 @@ import { formatearPrecio } from '../../utils/formato'
 
 function DetalleCompra({ items, total }) {
   return (
-    <table className="tabla">
-      <thead>
-        <tr>
-          <th>Producto</th>
-          <th>Cantidad</th>
-          <th>Precio unitario</th>
-          <th>Subtotal</th>
-        </tr>
-      </thead>
-      <tbody>
+    <section className="tarjeta bloque-pago">
+      <h2>Tu pedido</h2>
+      <ul className="detalle-compra">
         {items.map((item) => (
-          <tr key={item.id}>
-            <td>{item.nombreProducto}</td>
-            <td>{item.cantidad}</td>
-            <td>{formatearPrecio(item.precioUnitarioConDescuento)}</td>
-            <td>{formatearPrecio(item.subtotal)}</td>
-          </tr>
+          <li key={item.id}>
+            <span>{item.nombreProducto}</span>
+            <span>
+              {item.cantidad} × {formatearPrecio(item.precioUnitarioConDescuento)}
+            </span>
+            <strong>{formatearPrecio(item.subtotal)}</strong>
+          </li>
         ))}
-      </tbody>
-      <tfoot>
-        <tr>
-          <th colSpan="3">Total</th>
-          <th>{formatearPrecio(total)}</th>
-        </tr>
-      </tfoot>
-    </table>
+      </ul>
+      <p className="resumen-total">
+        Total <span className="precio">{formatearPrecio(total)}</span>
+      </p>
+    </section>
   )
 }
 

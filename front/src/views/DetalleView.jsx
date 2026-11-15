@@ -1,18 +1,19 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, useParams } from 'react-router-dom'
-import Aviso from '../components/Aviso'
 import Cargando from '../components/Cargando'
 import Galeria from '../components/catalogo/Galeria'
 import InfoProducto from '../components/catalogo/InfoProducto'
 import SeccionResenas from '../components/resenas/SeccionResenas'
-import { fetchProductoPorId } from '../redux/productoSlice'
+import { fetchProductoPorId, limpiarError } from '../redux/productoSlice'
+import { useLimpiarAlSalir } from '../hooks/useLimpiarAlSalir'
 
 function DetalleView() {
   const { id } = useParams()
   const dispatch = useDispatch()
   const { detalle, error } = useSelector((state) => state.productos)
   const cargado = detalle !== null && String(detalle.id) === id
+  useLimpiarAlSalir(limpiarError)
 
   useEffect(() => {
     if (!cargado) dispatch(fetchProductoPorId(id))
@@ -34,7 +35,8 @@ function DetalleView() {
 
   return (
     <section className="pagina-sistema">
-      <Aviso mensaje={error} />
+      <h1 className="titulo-pagina">Este equipo no está disponible</h1>
+      <p>Puede que el vendedor lo haya dado de baja o que el enlace esté mal escrito.</p>
       <Link to="/" className="boton">
         Volver al catálogo
       </Link>

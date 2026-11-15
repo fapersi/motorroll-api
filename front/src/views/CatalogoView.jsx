@@ -5,8 +5,11 @@ import Aviso from '../components/Aviso'
 import Cargando from '../components/Cargando'
 import Filtros from '../components/catalogo/Filtros'
 import GrillaProductos from '../components/catalogo/GrillaProductos'
+import TiendasOficiales from '../components/tiendas/TiendasOficiales'
 import { fetchCategorias } from '../redux/categoriaSlice'
 import { cambiarFiltros, fetchProductos, limpiarError } from '../redux/productoSlice'
+
+const SIN_FILTROS = { texto: '', categorias: [], precioMin: '', precioMax: '', ordenarPor: '' }
 
 function CatalogoView() {
   const dispatch = useDispatch()
@@ -27,17 +30,29 @@ function CatalogoView() {
   return (
     <>
       <Portada />
-      <h1 className="titulo-pagina" id="catalogo">
+      <TiendasOficiales />
+      <h2 className="titulo-pagina" id="catalogo">
         Catálogo
-      </h1>
+      </h2>
       <Filtros
         filtros={filtros}
         categorias={categorias.items}
         onCambiar={(nuevos) => dispatch(cambiarFiltros(nuevos))}
       />
-      <Aviso mensaje={error} onCerrar={() => dispatch(limpiarError())} />
-      {loading && <Cargando />}
-      {!loading && !error && <GrillaProductos productos={items} />}
+      <Aviso
+        mensaje={error}
+        accion={{ texto: 'Reintentar', onClick: () => dispatch(fetchProductos(filtros)) }}
+        onCerrar={() => dispatch(limpiarError())}
+      />
+      {loading && items.length === 0 && <Cargando />}
+      <div className={loading ? 'actualizando' : undefined} aria-busy={loading}>
+        {!error && !(loading && items.length === 0) && (
+          <GrillaProductos
+            productos={items}
+            onLimpiar={() => dispatch(cambiarFiltros(SIN_FILTROS))}
+          />
+        )}
+      </div>
     </>
   )
 }

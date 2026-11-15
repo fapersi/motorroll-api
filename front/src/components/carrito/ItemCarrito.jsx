@@ -8,7 +8,7 @@ function avisoDeStock(disponible) {
   return `Solo quedan ${disponible} unidades`
 }
 
-function ItemCarrito({ item, onCantidad, onQuitar }) {
+function ItemCarrito({ item, ocupado, onCantidad, onQuitar }) {
   return (
     <li className="tarjeta item-carrito">
       <FotoProducto ruta={item.imagen} nombre={item.nombreProducto} />
@@ -26,10 +26,11 @@ function ItemCarrito({ item, onCantidad, onQuitar }) {
         <SelectorCantidad
           cantidad={item.cantidad}
           maximo={item.stockDisponible}
+          ocupado={ocupado}
           onCambiar={onCantidad}
         />
         <p className="precio">{formatearPrecio(item.subtotal)}</p>
-        <button className="boton boton-secundario" onClick={onQuitar}>
+        <button className="boton boton-secundario" disabled={ocupado} onClick={onQuitar}>
           Quitar
         </button>
       </div>

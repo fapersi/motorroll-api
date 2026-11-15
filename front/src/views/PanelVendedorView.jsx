@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import Aviso from '../components/Aviso'
 import Cargando from '../components/Cargando'
+import AccesosTienda from '../components/vendedor/AccesosTienda'
 import FormProducto from '../components/vendedor/FormProducto'
 import TablaPublicaciones from '../components/vendedor/TablaPublicaciones'
 import { fetchCategorias } from '../redux/categoriaSlice'
 import { fetchMisProductos, limpiarError } from '../redux/productoSlice'
+import { useLimpiarAlSalir } from '../hooks/useLimpiarAlSalir'
 
 function PanelVendedorView() {
   const dispatch = useDispatch()
@@ -13,6 +15,7 @@ function PanelVendedorView() {
   const categorias = useSelector((state) => state.categorias)
   const [creando, setCreando] = useState(false)
   const [editando, setEditando] = useState(null)
+  useLimpiarAlSalir(limpiarError)
 
   useEffect(() => {
     if (!miosCargados) dispatch(fetchMisProductos())
@@ -32,7 +35,8 @@ function PanelVendedorView() {
   return (
     <section>
       <h1 className="titulo-pagina">Mis publicaciones</h1>
-      <Aviso mensaje={error} onCerrar={() => dispatch(limpiarError())} />
+      <AccesosTienda />
+      <Aviso mensaje={error} flotante onCerrar={() => dispatch(limpiarError())} />
       {creando || editando ? (
         <FormProducto
           key={editando ? editando.id : 'nuevo'}

@@ -1,10 +1,15 @@
-export function disponibilidad(agenda, bancoId, fecha) {
-  const delBanco = agenda.ocupados.filter((o) => o.bancoId === bancoId)
-  const cuantosEn = (dia) => delBanco.filter((o) => o.fecha === dia).length
+export function disponibilidad(agenda, bancoId, fecha, misTurnos) {
+  const delBanco = agenda.ocupados.filter((ocupado) => ocupado.bancoId === bancoId)
+  const cuantosEn = (dia) => delBanco.filter((ocupado) => ocupado.fecha === dia).length
+  const esMio = (turno) =>
+    turno.estado === 'CONFIRMADO' && turno.bancoId === bancoId && turno.fecha === fecha
   return {
-    ocupadosDelDia: delBanco.filter((o) => o.fecha === fecha).map((o) => o.hora),
+    ocupadosDelDia: delBanco
+      .filter((ocupado) => ocupado.fecha === fecha)
+      .map((ocupado) => ocupado.hora),
+    propiosDelDia: misTurnos.filter(esMio).map((turno) => turno.hora),
     diasLlenos: delBanco
-      .map((o) => o.fecha)
+      .map((ocupado) => ocupado.fecha)
       .filter((dia) => cuantosEn(dia) >= agenda.horarios.length),
   }
 }

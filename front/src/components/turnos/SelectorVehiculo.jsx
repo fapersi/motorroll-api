@@ -4,7 +4,9 @@ function SelectorVehiculo({ vehiculo, bancos, onElegir }) {
   return (
     <div className="selector-vehiculo">
       {VEHICULOS.map((opcion) => {
-        const cantidad = bancos.filter((b) => b.vehiculosCompatibles.includes(opcion.id)).length
+        const cantidad = bancos.filter((banco) =>
+          banco.vehiculosCompatibles.includes(opcion.id),
+        ).length
         return (
           <button
             key={opcion.id}

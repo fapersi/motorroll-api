@@ -35,7 +35,13 @@ function FormProducto({ producto, categorias, onCerrar }) {
   return (
     <form className="formulario formulario-producto" onSubmit={enviar} noValidate>
       <h2>{producto ? `Editar ${producto.nombre}` : 'Nueva publicación'}</h2>
-      <CamposProducto datos={datos} errores={errores} categorias={categorias} onCambiar={cambiar} />
+      <CamposProducto
+        datos={datos}
+        errores={errores}
+        categorias={categorias}
+        esNuevo={!producto}
+        onCambiar={cambiar}
+      />
       <label className="campo">
         {producto ? 'Agregar fotos' : 'Fotos'}
         <input

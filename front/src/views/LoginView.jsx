@@ -4,17 +4,19 @@ import Aviso from '../components/Aviso'
 import FormLogin from '../components/usuarios/FormLogin'
 import PantallaAcceso from '../components/usuarios/PantallaAcceso'
 import { limpiarError, login } from '../redux/usuarioSlice'
+import { useLimpiarAlSalir } from '../hooks/useLimpiarAlSalir'
 
 function LoginView() {
   const dispatch = useDispatch()
   const { sesion, loading, error } = useSelector((state) => state.usuario)
   const location = useLocation()
+  useLimpiarAlSalir(limpiarError)
 
   if (sesion) return <Navigate to={location.state?.desde || '/'} replace />
 
   return (
     <PantallaAcceso
-      titulo="Bienvenido de nuevo"
+      titulo="Ingresá a tu cuenta"
       bajada="Ingresá para comprar, reservar turnos y ver tus órdenes."
     >
       <FormLogin onEnviar={(credenciales) => dispatch(login(credenciales))} cargando={loading}>

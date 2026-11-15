@@ -1,4 +1,12 @@
-export const DIAS_SEMANA = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
+export const DIAS_SEMANA = [
+  { id: 'lunes', letra: 'L' },
+  { id: 'martes', letra: 'M' },
+  { id: 'miercoles', letra: 'M' },
+  { id: 'jueves', letra: 'J' },
+  { id: 'viernes', letra: 'V' },
+  { id: 'sabado', letra: 'S' },
+  { id: 'domingo', letra: 'D' },
+]
 
 export function claveDia(fecha) {
   const mes = String(fecha.getMonth() + 1).padStart(2, '0')
@@ -16,11 +24,12 @@ export function sumarDias(fecha, dias) {
 }
 
 export function diasDelMes(primerDia) {
-  const huecos = (primerDia.getDay() + 6) % 7
   const total = new Date(primerDia.getFullYear(), primerDia.getMonth() + 1, 0).getDate()
-  const vacios = Array.from({ length: huecos }, () => null)
-  const dias = Array.from({ length: total }, (_, i) => sumarDias(primerDia, i))
-  return [...vacios, ...dias]
+  return Array.from({ length: total }, (_, numero) => sumarDias(primerDia, numero))
+}
+
+export function columnaDelDia(fecha) {
+  return ((fecha.getDay() + 6) % 7) + 1
 }
 
 export function esReservable(fecha, diasDeAnticipacion) {

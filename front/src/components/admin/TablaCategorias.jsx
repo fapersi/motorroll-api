@@ -10,17 +10,20 @@ function TablaCategorias({ categorias, onEditar, onBorrar }) {
         </tr>
       </thead>
       <tbody>
-        {categorias.map((c) => (
-          <tr key={c.id}>
-            <td>{c.nombre}</td>
-            <td>{c.descripcion}</td>
-            <td>{c.categoriaPadreNombre || '—'}</td>
+        {categorias.map((categoria) => (
+          <tr key={categoria.id}>
+            <td>{categoria.nombre}</td>
+            <td>{categoria.descripcion}</td>
+            <td>{categoria.categoriaPadreNombre || '—'}</td>
             <td>
               <div className="acciones-fila">
-                <button className="boton-accion" onClick={() => onEditar(c)}>
+                <button className="boton-accion" onClick={() => onEditar(categoria)}>
                   Editar
                 </button>
-                <button className="boton-accion boton-accion-rojo" onClick={() => onBorrar(c)}>
+                <button
+                  className="boton-accion boton-accion-rojo"
+                  onClick={() => onBorrar(categoria)}
+                >
                   Borrar
                 </button>
               </div>

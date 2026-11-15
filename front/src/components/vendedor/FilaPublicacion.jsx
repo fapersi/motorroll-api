@@ -28,13 +28,19 @@ function FilaPublicacion({ producto, onEditar, onStock, onDescuento, onFoto, onB
       </td>
       <td>{formatearPrecio(producto.precioFinal)}</td>
       <td>
-        <EditorNumero key={producto.stock} valor={producto.stock} onGuardar={onStock} />
+        <EditorNumero
+          key={producto.stock}
+          valor={producto.stock}
+          etiqueta={`Stock de ${producto.nombre}`}
+          onGuardar={onStock}
+        />
       </td>
       <td>
         <EditorNumero
           key={producto.descuento}
           valor={producto.descuento}
           maximo={100}
+          etiqueta={`Descuento de ${producto.nombre}`}
           onGuardar={onDescuento}
         />
       </td>

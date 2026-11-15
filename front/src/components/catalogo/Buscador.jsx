@@ -12,9 +12,13 @@ function Buscador({ texto, onBuscar }) {
     <form className="buscador" onSubmit={enviar}>
       <input
         type="search"
+        aria-label="Buscar productos"
         placeholder="Buscar por nombre o descripción"
         value={valor}
-        onChange={(e) => setValor(e.target.value)}
+        onChange={(e) => {
+          setValor(e.target.value)
+          if (e.target.value === '' && texto !== '') onBuscar('')
+        }}
       />
       <button className="boton">Buscar</button>
     </form>

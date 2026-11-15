@@ -1,4 +1,11 @@
+import { useState } from 'react'
 import CodigoQR from './CodigoQR'
+
+const BOTONES = {
+  TRANSFERENCIA: 'Ya transferí',
+  BILLETERA_VIRTUAL: 'Ya pagué con el QR',
+  EFECTIVO: 'Generar el cupón',
+}
 
 function Dato({ titulo, valor }) {
   return (
@@ -9,7 +16,9 @@ function Dato({ titulo, valor }) {
   )
 }
 
-function PagoSinTarjeta({ metodoPago, referencia, textoBoton, onPagar }) {
+function PagoSinTarjeta({ metodoPago, onPagar }) {
+  const [referencia] = useState(() => Date.now() % 100000000)
+
   return (
     <div className="pago-sin-tarjeta">
       {metodoPago === 'TRANSFERENCIA' && (
@@ -34,7 +43,7 @@ function PagoSinTarjeta({ metodoPago, referencia, textoBoton, onPagar }) {
       )}
       <p className="nota-segura">Es una simulación: no se mueve dinero real.</p>
       <button className="boton boton-grande" onClick={onPagar}>
-        {textoBoton}
+        {BOTONES[metodoPago]}
       </button>
     </div>
   )

@@ -8,7 +8,7 @@ export const fetchOrdenes = createAsyncThunk('ordenes/fetchOrdenes', async () =>
   return data
 })
 
-const initialState = { items: [], cargado: false, loading: false, error: null }
+const initialState = { items: [], cargado: false, ultima: null, loading: false, error: null }
 
 const ordenSlice = createSlice({
   name: 'ordenes',
@@ -30,6 +30,7 @@ const ordenSlice = createSlice({
         state.error = action.error.message
       })
       .addCase(checkout.fulfilled, (state, action) => {
+        state.ultima = action.payload
         if (state.cargado) state.items = [action.payload, ...state.items]
       })
       .addCase(login.fulfilled, () => initialState)

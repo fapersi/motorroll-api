@@ -6,7 +6,7 @@ function primeroDelMes(fecha, corrimiento = 0) {
   return new Date(fecha.getFullYear(), fecha.getMonth() + corrimiento, 1)
 }
 
-function Calendario({ elegida, diasDeAnticipacion, diasLlenos, onElegir }) {
+function Calendario({ elegida, diasDeAnticipacion, diasLlenos, feriados, onElegir }) {
   const [mes, setMes] = useState(primeroDelMes(hoy()))
   const puedeVolver = mes > primeroDelMes(hoy())
   const puedeAvanzar = mes < primeroDelMes(sumarDias(hoy(), diasDeAnticipacion))
@@ -37,6 +37,7 @@ function Calendario({ elegida, diasDeAnticipacion, diasLlenos, onElegir }) {
         elegida={elegida}
         diasDeAnticipacion={diasDeAnticipacion}
         diasLlenos={diasLlenos}
+        feriados={feriados}
         onElegir={onElegir}
       />
     </div>
