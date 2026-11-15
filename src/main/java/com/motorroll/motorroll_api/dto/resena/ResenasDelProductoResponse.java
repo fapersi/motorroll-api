@@ -16,4 +16,5 @@ public class ResenasDelProductoResponse {
     private int cantidad;
     private List<Long> porEstrellas;
     private List<ResenaResponse> resenas;
+    private boolean puedeOpinar;
 }

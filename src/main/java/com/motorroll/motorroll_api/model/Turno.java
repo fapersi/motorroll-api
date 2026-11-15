@@ -47,6 +47,10 @@ public class Turno {
     private String comentario;
 
     @Builder.Default
+    @Column(name = "cotizar_vtv", columnDefinition = "boolean default false not null")
+    private boolean cotizarVtv = false;
+
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private EstadoTurno estado = EstadoTurno.CONFIRMADO;

@@ -2,6 +2,8 @@ package com.motorroll.motorroll_api.exception;
 
 import com.motorroll.motorroll_api.dto.common.ApiError;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +18,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class ManejadorGlobalDeExcepciones {
     @ExceptionHandler(RecursoNoEncontradoException.class)
@@ -58,7 +62,7 @@ public class ManejadorGlobalDeExcepciones {
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .mensaje("Hay campos invalidos en la solicitud")
+                .mensaje("Hay campos inválidos en la solicitud")
                 .path(request.getRequestURI())
                 .errores(errores)
                 .build();
@@ -70,55 +74,80 @@ public class ManejadorGlobalDeExcepciones {
     public ResponseEntity<ApiError> manejarMetodoNoSoportado(HttpRequestMethodNotSupportedException ex,
                                                             HttpServletRequest request) {
         String permitidos = ex.getSupportedHttpMethods() == null ? "" :
-                " Metodos permitidos: " + ex.getSupportedHttpMethods() + ".";
+                " Métodos permitidos: " + ex.getSupportedHttpMethods() + ".";
 
         return armarRespuesta(HttpStatus.METHOD_NOT_ALLOWED,
-                "El metodo " + ex.getMethod() + " no esta soportado en esta ruta." + permitidos, request);
+                "El método " + ex.getMethod() + " no está soportado en esta ruta." + permitidos, request);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> manejarJsonIlegible(HttpMessageNotReadableException ex,
                                                         HttpServletRequest request) {
         return armarRespuesta(HttpStatus.BAD_REQUEST,
-                "El cuerpo de la solicitud no es un JSON valido o no tiene el formato esperado", request);
+                "El cuerpo de la solicitud no es un JSON válido o no tiene el formato esperado", request);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiError> manejarTipoInvalido(MethodArgumentTypeMismatchException ex,
                                                         HttpServletRequest request) {
         return armarRespuesta(HttpStatus.BAD_REQUEST,
-                "El valor '" + ex.getValue() + "' no es valido para el parametro " + ex.getName(), request);
+                "El valor '" + ex.getValue() + "' no es válido para el parámetro " + ex.getName(), request);
     }
 
-    @ExceptionHandler({HttpMediaTypeNotSupportedException.class,
-                       MissingServletRequestPartException.class,
-                       MissingServletRequestParameterException.class})
-    public ResponseEntity<ApiError> manejarRequestIncompleto(Exception ex, HttpServletRequest request) {
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ApiError> manejarArchivoFaltante(MissingServletRequestPartException ex,
+                                                           HttpServletRequest request) {
         return armarRespuesta(HttpStatus.BAD_REQUEST,
-                "Falta el archivo o el formato del request no es el esperado. "
-                        + "Para subir una foto hay que enviarla como multipart/form-data en el campo 'imagen'",
-                request);
+                "Falta el archivo. Hay que enviarlo como multipart/form-data en el campo '"
+                        + ex.getRequestPartName() + "'", request);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiError> manejarParametroFaltante(MissingServletRequestParameterException ex,
+                                                             HttpServletRequest request) {
+        return armarRespuesta(HttpStatus.BAD_REQUEST, "Falta el parámetro " + ex.getParameterName(), request);
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ApiError> manejarFormatoNoSoportado(HttpMediaTypeNotSupportedException ex,
+                                                              HttpServletRequest request) {
+        String recibido = ex.getContentType() == null ? "sin Content-Type" : ex.getContentType().toString();
+        return armarRespuesta(HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                "Esta ruta no acepta el formato " + recibido, request);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiError> manejarRutaInexistente(NoResourceFoundException ex, HttpServletRequest request) {
+        return armarRespuesta(HttpStatus.NOT_FOUND, "La ruta " + request.getRequestURI() + " no existe", request);
+    }
+
+    @ExceptionHandler(ConcurrencyFailureException.class)
+    public ResponseEntity<ApiError> manejarCambioSimultaneo(ConcurrencyFailureException ex,
+                                                            HttpServletRequest request) {
+        return armarRespuesta(HttpStatus.CONFLICT,
+                "Otra persona modificó los mismos datos al mismo tiempo. Revisá y volvé a intentar", request);
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ApiError> manejarArchivoDemasiadoGrande(MaxUploadSizeExceededException ex,
                                                                   HttpServletRequest request) {
         return armarRespuesta(HttpStatus.PAYLOAD_TOO_LARGE,
-                "El archivo es demasiado grande. El maximo permitido es 5 MB", request);
+                "El archivo es demasiado grande. El máximo permitido es 5 MB", request);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> manejarDatosRelacionados(DataIntegrityViolationException ex,
                                                              HttpServletRequest request) {
         return armarRespuesta(HttpStatus.CONFLICT,
-                "No se puede eliminar porque tiene datos relacionados (productos, carrito u ordenes). "
-                        + "Si es un usuario, se puede deshabilitar", request);
+                "La operación choca con datos relacionados o repetidos. Si es un usuario con compras, "
+                        + "publicaciones, reseñas o turnos, deshabilitalo en lugar de borrarlo", request);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> manejarErrorInesperado(Exception ex, HttpServletRequest request) {
+        log.error("Error inesperado en {}", request.getRequestURI(), ex);
         return armarRespuesta(HttpStatus.INTERNAL_SERVER_ERROR,
-                "Ocurrio un error inesperado: " + ex.getMessage(), request);
+                "Ocurrió un error inesperado. Probá de nuevo en unos minutos", request);
     }
 
     private ResponseEntity<ApiError> armarRespuesta(HttpStatus status, String mensaje, HttpServletRequest request) {

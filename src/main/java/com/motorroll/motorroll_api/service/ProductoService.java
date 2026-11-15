@@ -13,7 +13,7 @@ import java.util.List;
 
 public interface ProductoService {
     List<ProductoResumenResponse> buscar(String texto,
-                                         Long categoriaId,
+                                         List<Long> categoriaIds,
                                          String marca,
                                          BigDecimal precioMin,
                                          BigDecimal precioMax,

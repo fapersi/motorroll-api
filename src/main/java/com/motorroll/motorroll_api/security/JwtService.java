@@ -40,10 +40,6 @@ public class JwtService {
         return leerClaims(token).getSubject();
     }
 
-    public String extraerRol(String token) {
-        return leerClaims(token).get("rol", String.class);
-    }
-
     private Claims leerClaims(String token) {
         return Jwts.parser()
                 .verifyWith(clave)

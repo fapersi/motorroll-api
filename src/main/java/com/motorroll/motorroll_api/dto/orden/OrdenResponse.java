@@ -1,5 +1,6 @@
 package com.motorroll.motorroll_api.dto.orden;
 
+import com.motorroll.motorroll_api.dto.notificacion.NotificacionResponse;
 import com.motorroll.motorroll_api.model.EstadoOrden;
 import com.motorroll.motorroll_api.model.MetodoPago;
 import lombok.AllArgsConstructor;
@@ -29,4 +30,5 @@ public class OrdenResponse {
     private MetodoPago metodoPago;
     private Integer cuotas;
     private String direccionEnvio;
+    private NotificacionResponse notificacion;
 }

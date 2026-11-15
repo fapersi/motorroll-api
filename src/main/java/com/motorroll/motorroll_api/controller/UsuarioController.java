@@ -46,16 +46,16 @@ public class UsuarioController {
 
     @PutMapping("/{id}/rol")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UsuarioResponse> cambiarRol(@PathVariable Long id,
+    public ResponseEntity<UsuarioResponse> cambiarRol(Authentication authentication, @PathVariable Long id,
                                                       @Valid @RequestBody CambiarRolRequest request) {
-        return ResponseEntity.ok(usuarioService.cambiarRol(id, request.getRol()));
+        return ResponseEntity.ok(usuarioService.cambiarRol(authentication.getName(), id, request.getRol()));
     }
 
     @PutMapping("/{id}/estado")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UsuarioResponse> cambiarEstado(@PathVariable Long id,
+    public ResponseEntity<UsuarioResponse> cambiarEstado(Authentication authentication, @PathVariable Long id,
                                                          @Valid @RequestBody CambiarEstadoRequest request) {
-        return ResponseEntity.ok(usuarioService.cambiarEstado(id, request.getActivo()));
+        return ResponseEntity.ok(usuarioService.cambiarEstado(authentication.getName(), id, request.getActivo()));
     }
 
     @DeleteMapping("/{id}")

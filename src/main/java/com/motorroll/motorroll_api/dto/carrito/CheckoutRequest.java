@@ -14,13 +14,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CheckoutRequest {
-    @NotNull(message = "Elegi un metodo de pago")
+    @NotNull(message = "Elegí un método de pago")
     private MetodoPago metodoPago;
 
     private boolean usarPuntos;
 
-    @NotBlank(message = "Indica la direccion de entrega")
-    @Size(max = 200, message = "La direccion no puede superar los 200 caracteres")
+    @NotBlank(message = "Indicá la dirección de entrega")
+    @Size(min = 8, max = 200, message = "La dirección tiene que tener entre 8 y 200 caracteres")
     private String direccionEnvio;
 
     @Min(value = 1, message = "Las cuotas van de 1 a 12")

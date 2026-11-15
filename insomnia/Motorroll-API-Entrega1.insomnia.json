@@ -1138,13 +1138,17 @@
       "_type": "request",
       "parentId": "fld_carrito",
       "name": "CHECKOUT (confirmar la compra)",
-      "description": "201 con la orden. Revalida stock item por item, calcula el total, descuenta stock y cierra el carrito. Todo @Transactional.",
+      "description": "201 con la orden. Exige método de pago y dirección (si falta el cuerpo, 400). Revalida stock, descuenta y cierra el carrito. Todo @Transactional.",
       "method": "POST",
       "url": "{{ _.baseUrl }}/api/carrito/checkout",
       "headers": [
         {
           "name": "Authorization",
           "value": "Bearer {{ _.token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
         }
       ],
       "parameters": [],
@@ -1155,7 +1159,10 @@
       "settingEncodeUrl": true,
       "settingRebuildPath": true,
       "settingFollowRedirects": "global",
-      "body": {}
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"metodoPago\": \"TARJETA_DEBITO\",\n  \"direccionEnvio\": \"Av. Corrientes 1234, CABA\",\n  \"cuotas\": 1,\n  \"usarPuntos\": false\n}"
+      }
     },
     {
       "_id": "fld_ord",

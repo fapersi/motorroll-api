@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CambiarEstadoRequest {
-    @NotNull(message = "Tenes que indicar si la cuenta queda activa o no")
+    @NotNull(message = "Tenés que indicar si la cuenta queda activa o no")
     private Boolean activo;
 }

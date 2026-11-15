@@ -15,23 +15,25 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TurnoRequest {
-    @NotNull(message = "Elegi el banco que queres probar")
+    @NotNull(message = "Elegí el banco que querés probar")
     private Long bancoId;
 
-    @NotNull(message = "Elegi el dia del turno")
-    @Future(message = "El turno tiene que ser a partir de manana")
+    @NotNull(message = "Elegí el día del turno")
+    @Future(message = "El turno tiene que ser a partir de mañana")
     private LocalDate fecha;
 
-    @NotBlank(message = "Elegi el horario")
+    @NotBlank(message = "Elegí el horario")
     private String hora;
 
-    @NotNull(message = "Indica con que vehiculo venis")
+    @NotNull(message = "Indicá con qué vehículo venís")
     private TipoVehiculo vehiculo;
 
-    @NotBlank(message = "Indica la marca y el modelo del vehiculo")
+    @NotBlank(message = "Indicá la marca y el modelo del vehículo")
     @Size(max = 80, message = "La marca y el modelo no pueden superar los 80 caracteres")
     private String modeloVehiculo;
 
     @Size(max = 300, message = "El comentario no puede superar los 300 caracteres")
     private String comentario;
+
+    private boolean cotizarVtv;
 }

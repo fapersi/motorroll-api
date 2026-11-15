@@ -51,7 +51,7 @@ public class CarritoController {
 
     @PostMapping("/checkout")
     public ResponseEntity<OrdenResponse> checkout(Authentication authentication,
-                                                  @Valid @RequestBody(required = false) CheckoutRequest request) {
+                                                  @Valid @RequestBody CheckoutRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(carritoService.checkout(authentication.getName(), request));
     }

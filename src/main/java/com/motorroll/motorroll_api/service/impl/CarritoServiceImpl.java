@@ -4,7 +4,6 @@ import com.motorroll.motorroll_api.dto.carrito.AgregarItemRequest;
 import com.motorroll.motorroll_api.dto.carrito.CarritoResponse;
 import com.motorroll.motorroll_api.dto.carrito.CheckoutRequest;
 import com.motorroll.motorroll_api.dto.orden.OrdenResponse;
-import com.motorroll.motorroll_api.exception.OperacionNoPermitidaException;
 import com.motorroll.motorroll_api.exception.RecursoNoEncontradoException;
 import com.motorroll.motorroll_api.exception.ReglaDeNegocioException;
 import com.motorroll.motorroll_api.mapper.CarritoMapper;
@@ -23,6 +22,7 @@ import com.motorroll.motorroll_api.repository.CarritoRepository;
 import com.motorroll.motorroll_api.repository.OrdenRepository;
 import com.motorroll.motorroll_api.repository.ProductoRepository;
 import com.motorroll.motorroll_api.service.CarritoService;
+import com.motorroll.motorroll_api.service.NotificacionService;
 import com.motorroll.motorroll_api.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -41,11 +41,16 @@ public class CarritoServiceImpl implements CarritoService {
     private final UsuarioService usuarioService;
     private final CarritoMapper carritoMapper;
     private final OrdenMapper ordenMapper;
+    private final NotificacionService notificacionService;
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public CarritoResponse verCarrito(String username) {
-        return carritoMapper.aResponse(obtenerOCrearCarrito(username));
+        Usuario comprador = usuarioService.buscarEntidadPorUsername(username);
+        Carrito carrito = carritoRepository.findByCompradorIdAndEstado(comprador.getId(), EstadoCarrito.ABIERTO)
+                .orElseGet(() -> Carrito.builder().comprador(comprador).build());
+
+        return carritoMapper.aResponse(carrito);
     }
 
     @Override
@@ -58,7 +63,7 @@ public class CarritoServiceImpl implements CarritoService {
 
         if (!producto.hayStockPara(1)) {
             throw new ReglaDeNegocioException(
-                    "El producto " + producto.getNombre() + " esta sin stock. Consultar disponibilidad");
+                    "El producto " + producto.getNombre() + " está sin stock. Consultar disponibilidad");
         }
 
         ItemCarrito itemExistente = buscarItemPorProducto(carrito, producto.getId());
@@ -105,10 +110,14 @@ public class CarritoServiceImpl implements CarritoService {
     @Override
     @Transactional
     public CarritoResponse vaciar(String username) {
-        Carrito carrito = obtenerOCrearCarrito(username);
-        carrito.getItems().clear();
+        Usuario comprador = usuarioService.buscarEntidadPorUsername(username);
 
-        return carritoMapper.aResponse(carritoRepository.save(carrito));
+        return carritoRepository.findByCompradorIdAndEstado(comprador.getId(), EstadoCarrito.ABIERTO)
+                .map(carrito -> {
+                    carrito.getItems().clear();
+                    return carritoMapper.aResponse(carritoRepository.save(carrito));
+                })
+                .orElseGet(() -> carritoMapper.aResponse(Carrito.builder().comprador(comprador).build()));
     }
 
     @Override
@@ -116,14 +125,17 @@ public class CarritoServiceImpl implements CarritoService {
     public OrdenResponse checkout(String username, CheckoutRequest request) {
         Usuario comprador = usuarioService.buscarEntidadPorUsername(username);
         Carrito carrito = obtenerOCrearCarrito(username);
-        boolean usarPuntos = request != null && request.isUsarPuntos();
+        boolean usarPuntos = request.isUsarPuntos();
 
         if (carrito.getItems().isEmpty()) {
-            throw new ReglaDeNegocioException("El carrito esta vacio, no hay nada para comprar");
+            throw new ReglaDeNegocioException("El carrito está vacío, no hay nada para comprar");
+        }
+        if (request.getDireccionEnvio().trim().length() < 8) {
+            throw new ReglaDeNegocioException("La dirección tiene que tener al menos 8 caracteres");
         }
         if (usarPuntos && comprador.puntosDisponibles() < ProgramaDePuntos.PUNTOS_PARA_CANJE) {
-            throw new ReglaDeNegocioException("Necesitas " + ProgramaDePuntos.PUNTOS_PARA_CANJE
-                    + " puntos para el descuento y tenes " + comprador.puntosDisponibles());
+            throw new ReglaDeNegocioException("Necesitás " + ProgramaDePuntos.PUNTOS_PARA_CANJE
+                    + " puntos para el descuento y tenés " + comprador.puntosDisponibles());
         }
 
         Orden orden = Orden.builder()
@@ -139,7 +151,7 @@ public class CarritoServiceImpl implements CarritoService {
 
             if (!producto.isActivo()) {
                 throw new ReglaDeNegocioException(
-                        "La publicacion " + producto.getNombre() + " ya no esta disponible. Sacala del carrito para continuar");
+                        "La publicación " + producto.getNombre() + " ya no está disponible. Sacala del carrito para continuar");
             }
 
             validarStock(producto, item.getCantidad());
@@ -181,13 +193,12 @@ public class CarritoServiceImpl implements CarritoService {
         carrito.setEstado(EstadoCarrito.CONFIRMADO);
         carritoRepository.save(carrito);
 
-        return ordenMapper.aResponse(orden);
+        OrdenResponse respuesta = ordenMapper.aResponse(orden);
+        respuesta.setNotificacion(notificacionService.avisarCompra(orden));
+        return respuesta;
     }
 
     private void aplicarPago(Orden orden, CheckoutRequest request) {
-        if (request == null) {
-            return;
-        }
         orden.setMetodoPago(request.getMetodoPago());
         orden.setDireccionEnvio(request.getDireccionEnvio().trim());
         boolean esCredito = request.getMetodoPago() == MetodoPago.TARJETA_CREDITO;
@@ -215,8 +226,7 @@ public class CarritoServiceImpl implements CarritoService {
         return carrito.getItems().stream()
                 .filter(item -> item.getId().equals(itemId))
                 .findFirst()
-                .orElseThrow(() -> new OperacionNoPermitidaException(
-                        "El item " + itemId + " no pertenece a tu carrito"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("el ítem", itemId));
     }
 
     private ItemCarrito buscarItemPorProducto(Carrito carrito, Long productoId) {

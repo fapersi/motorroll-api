@@ -17,8 +17,8 @@ public class ProductoRequest {
     @Size(max = 150, message = "El nombre no puede superar los 150 caracteres")
     private String nombre;
 
-    @NotBlank(message = "La descripcion es obligatoria")
-    @Size(max = 2000, message = "La descripcion no puede superar los 2000 caracteres")
+    @NotBlank(message = "La descripción es obligatoria")
+    @Size(max = 2000, message = "La descripción no puede superar los 2000 caracteres")
     private String descripcion;
 
     @NotNull(message = "El precio es obligatorio")
@@ -32,7 +32,7 @@ public class ProductoRequest {
     @Size(max = 80, message = "La marca no puede superar los 80 caracteres")
     private String marca;
 
-    @NotNull(message = "Tenes que indicar la categoria del producto")
+    @NotNull(message = "Tenés que indicar la categoría del producto")
     private Long categoriaId;
 
     @Min(value = 0, message = "El descuento no puede ser menor a 0")

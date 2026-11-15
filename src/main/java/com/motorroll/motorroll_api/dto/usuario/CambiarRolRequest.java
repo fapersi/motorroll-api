@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CambiarRolRequest {
-    @NotNull(message = "Tenes que indicar el nuevo rol")
+    @NotNull(message = "Tenés que indicar el nuevo rol")
     private Rol rol;
 }

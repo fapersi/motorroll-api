@@ -11,6 +11,7 @@ import com.motorroll.motorroll_api.dto.producto.ProductoResumenResponse;
 import com.motorroll.motorroll_api.service.ProductoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
@@ -40,14 +42,14 @@ public class ProductoController {
     @GetMapping
     public ResponseEntity<List<ProductoResumenResponse>> buscar(
             @RequestParam(required = false) String texto,
-            @RequestParam(required = false) Long categoriaId,
+            @RequestParam(name = "categoriaId", required = false) List<Long> categoriaIds,
             @RequestParam(required = false) String marca,
             @RequestParam(required = false) BigDecimal precioMin,
             @RequestParam(required = false) BigDecimal precioMax,
             @RequestParam(required = false, defaultValue = "false") boolean soloConStock,
             @RequestParam(required = false) String ordenarPor) {
         return ResponseEntity.ok(productoService.buscar(
-                texto, categoriaId, marca, precioMin, precioMax, soloConStock, ordenarPor));
+                texto, categoriaIds, marca, precioMin, precioMax, soloConStock, ordenarPor));
     }
 
     @GetMapping("/marcas")
@@ -117,8 +119,9 @@ public class ProductoController {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(archivo.contentType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "inline; filename=\"" + archivo.nombreArchivo() + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.inline()
+                        .filename(archivo.nombreArchivo() == null ? "imagen" : archivo.nombreArchivo(), StandardCharsets.UTF_8)
+                        .build().toString())
                 .body(archivo.datos());
     }
 

@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .sessionManagement(sesion -> sesion.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(rutas -> rutas
 
-                        .requestMatchers(HttpMethod.GET, "/api/productos/mis-publicaciones").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/productos/mis-publicaciones").hasAnyRole("VENDEDOR", "ADMIN")
 
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/productos", "/api/productos/*", "/api/productos/marcas").permitAll()
@@ -46,13 +46,27 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/productos/*/resenas").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/turnos/bancos", "/api/turnos/agenda").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categorias", "/api/categorias/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/tiendas", "/api/tiendas/*", "/api/tiendas/*/logo").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
 
                         .requestMatchers(HttpMethod.POST, "/api/categorias/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/categorias/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/categorias/**").hasRole("ADMIN")
 
-                        // Gestion de usuarios: /me es para cualquier usuario logueado, el resto solo ADMIN
+                        .requestMatchers(HttpMethod.POST, "/api/productos/*/resenas").hasRole("COMPRADOR")
+                        .requestMatchers(HttpMethod.POST, "/api/productos", "/api/productos/**").hasAnyRole("VENDEDOR", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasAnyRole("VENDEDOR", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/productos/**").hasAnyRole("VENDEDOR", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasAnyRole("VENDEDOR", "ADMIN")
+
+                        .requestMatchers("/api/carrito", "/api/carrito/**").hasRole("COMPRADOR")
+                        .requestMatchers("/api/ordenes", "/api/ordenes/**").hasRole("COMPRADOR")
+                        .requestMatchers("/api/turnos/**").hasRole("COMPRADOR")
+
+                        .requestMatchers("/api/mi-tienda", "/api/mi-tienda/**").hasRole("VENDEDOR")
+                        .requestMatchers("/api/notificaciones", "/api/notificaciones/**").authenticated()
+
+                        // Gestión de usuarios: /me es para cualquier usuario logueado, el resto solo ADMIN
                         .requestMatchers("/api/usuarios/me").authenticated()
                         .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
 
@@ -60,10 +74,10 @@ public class SecurityConfig {
                 .exceptionHandling(errores -> errores
                         .authenticationEntryPoint((request, response, ex) ->
                                 escribirError(response, HttpStatus.UNAUTHORIZED,
-                                        "Necesitas iniciar sesion para acceder a este recurso", request.getRequestURI()))
+                                        "Necesitás iniciar sesión para acceder a este recurso", request.getRequestURI()))
                         .accessDeniedHandler((request, response, ex) ->
                                 escribirError(response, HttpStatus.FORBIDDEN,
-                                        "Tu rol no tiene permiso para esta operacion", request.getRequestURI())))
+                                        "Tu rol no tiene permiso para esta operación", request.getRequestURI())))
 
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

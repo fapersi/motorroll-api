@@ -29,13 +29,13 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public AuthResponse registrar(RegistroRequest request) {
         if (usuarioRepository.existsByUsername(request.getUsername())) {
-            throw new RecursoDuplicadoException("El nombre de usuario " + request.getUsername() + " ya esta en uso");
+            throw new RecursoDuplicadoException("El nombre de usuario " + request.getUsername() + " ya está en uso");
         }
-        if (usuarioRepository.existsByEmail(request.getEmail())) {
+        if (usuarioRepository.existsByEmailIgnoreCase(request.getEmail())) {
             throw new RecursoDuplicadoException("Ya existe una cuenta registrada con el mail " + request.getEmail());
         }
         if (request.getRol() == Rol.ADMIN) {
-            throw new ReglaDeNegocioException("Solo podes registrarte como COMPRADOR o VENDEDOR");
+            throw new ReglaDeNegocioException("Solo podés registrarte como COMPRADOR o VENDEDOR");
         }
 
         Usuario usuario = Usuario.builder()
@@ -55,13 +55,13 @@ public class AuthServiceImpl implements AuthService {
     @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest request) {
         Usuario usuario = usuarioRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new CredencialesInvalidasException("Usuario o contrasenia incorrectos"));
+                .orElseThrow(() -> new CredencialesInvalidasException("Usuario o contraseña incorrectos"));
 
         if (!passwordEncoder.matches(request.getPassword(), usuario.getPassword())) {
-            throw new CredencialesInvalidasException("Usuario o contrasenia incorrectos");
+            throw new CredencialesInvalidasException("Usuario o contraseña incorrectos");
         }
         if (!usuario.isActivo()) {
-            throw new CredencialesInvalidasException("La cuenta esta deshabilitada. Contactate con un administrador");
+            throw new CredencialesInvalidasException("La cuenta está deshabilitada. Contactate con un administrador");
         }
 
         return armarRespuesta(usuario);

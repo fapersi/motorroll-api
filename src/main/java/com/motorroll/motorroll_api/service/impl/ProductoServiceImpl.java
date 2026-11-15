@@ -30,7 +30,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.Normalizer;
 import java.util.Base64;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -44,14 +46,23 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProductoResumenResponse> buscar(String texto, Long categoriaId, String marca,
+    public List<ProductoResumenResponse> buscar(String texto, List<Long> categoriaIds, String marca,
                                                 BigDecimal precioMin, BigDecimal precioMax,
                                                 boolean soloConStock, String ordenarPor) {
+        boolean todasLasCategorias = categoriaIds == null || categoriaIds.isEmpty();
         List<Producto> productos = productoRepository.buscarConFiltros(
-                normalizar(texto), categoriaId, normalizar(marca),
-                precioMin, precioMax, soloConStock, armarOrden(ordenarPor));
+                todasLasCategorias, todasLasCategorias ? List.of(-1L) : categoriaIds,
+                normalizar(marca), precioMin, precioMax, soloConStock, armarOrden(ordenarPor));
+        String buscado = sinTildes(normalizar(texto));
+        if (buscado != null) {
+            productos = productos.stream()
+                    .filter(producto -> sinTildes(producto.getNombre()).contains(buscado)
+                            || (producto.getDescripcion() != null
+                            && sinTildes(producto.getDescripcion()).contains(buscado)))
+                    .toList();
+        }
 
-        return productoMapper.aResumen(productos);
+        return productoMapper.aResumen(ordenarPorPrecioFinal(productos, ordenarPor));
     }
 
     @Override
@@ -114,7 +125,6 @@ public class ProductoServiceImpl implements ProductoService {
         producto.setNombre(request.getNombre());
         producto.setDescripcion(request.getDescripcion());
         producto.setPrecio(request.getPrecio());
-        producto.setStock(request.getStock());
         producto.setMarca(request.getMarca());
         producto.setCategoria(buscarCategoria(request.getCategoriaId()));
 
@@ -242,13 +252,13 @@ public class ProductoServiceImpl implements ProductoService {
 
     private void validarArchivo(MultipartFile archivo) {
         if (archivo == null || archivo.isEmpty()) {
-            throw new ReglaDeNegocioException("Tenes que adjuntar un archivo de imagen");
+            throw new ReglaDeNegocioException("Tenés que adjuntar un archivo de imagen");
         }
 
         String tipo = archivo.getContentType();
         if (tipo == null || !TIPOS_PERMITIDOS.contains(tipo.toLowerCase())) {
             throw new ReglaDeNegocioException(
-                    "El archivo tiene que ser una imagen (JPG, PNG, WEBP o GIF). Se recibio: " + tipo);
+                    "El archivo tiene que ser una imagen (JPG, PNG, WEBP o GIF). Se recibió: " + tipo);
         }
     }
 
@@ -270,7 +280,7 @@ public class ProductoServiceImpl implements ProductoService {
 
         boolean esElDuenio = producto.getVendedor().getId().equals(usuario.getId());
         if (!esElDuenio && usuario.getRol() != Rol.ADMIN) {
-            throw new OperacionNoPermitidaException("Solo el vendedor que publico el producto puede modificarlo");
+            throw new OperacionNoPermitidaException("Solo el vendedor que publicó el producto puede modificarlo");
         }
 
         return producto;
@@ -278,13 +288,13 @@ public class ProductoServiceImpl implements ProductoService {
 
     private void validarQuePuedaPublicar(Usuario usuario) {
         if (usuario.getRol() != Rol.VENDEDOR && usuario.getRol() != Rol.ADMIN) {
-            throw new OperacionNoPermitidaException("Necesitas una cuenta de VENDEDOR para publicar productos");
+            throw new OperacionNoPermitidaException("Necesitás una cuenta de VENDEDOR para publicar productos");
         }
     }
 
     private Categoria buscarCategoria(Long categoriaId) {
         return categoriaRepository.findById(categoriaId)
-                .orElseThrow(() -> new RecursoNoEncontradoException("la categoria", categoriaId));
+                .orElseThrow(() -> new RecursoNoEncontradoException("la categoría", categoriaId));
     }
 
     private void reemplazarImagenes(Producto producto, List<ImagenRequest> imagenes) {
@@ -347,7 +357,24 @@ public class ProductoServiceImpl implements ProductoService {
         };
     }
 
+    private List<Producto> ordenarPorPrecioFinal(List<Producto> productos, String ordenarPor) {
+        if ("precio_asc".equalsIgnoreCase(ordenarPor)) {
+            return productos.stream().sorted(Comparator.comparing(Producto::calcularPrecioFinal)).toList();
+        }
+        if ("precio_desc".equalsIgnoreCase(ordenarPor)) {
+            return productos.stream().sorted(Comparator.comparing(Producto::calcularPrecioFinal).reversed()).toList();
+        }
+        return productos;
+    }
+
     private String normalizar(String valor) {
         return (valor == null || valor.isBlank()) ? null : valor.trim();
+    }
+
+    private String sinTildes(String valor) {
+        if (valor == null) {
+            return null;
+        }
+        return Normalizer.normalize(valor, Normalizer.Form.NFD).replaceAll("\\p{M}", "").toLowerCase();
     }
 }

@@ -17,9 +17,9 @@ public interface UsuarioService {
 
     UsuarioResponse obtenerPorId(Long id);
 
-    UsuarioResponse cambiarRol(Long id, Rol nuevoRol);
+    UsuarioResponse cambiarRol(String adminUsername, Long id, Rol nuevoRol);
 
-    UsuarioResponse cambiarEstado(Long id, boolean activo);
+    UsuarioResponse cambiarEstado(String adminUsername, Long id, boolean activo);
 
     void eliminar(Long id);
 

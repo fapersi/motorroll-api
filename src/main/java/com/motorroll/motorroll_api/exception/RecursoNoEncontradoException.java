@@ -10,6 +10,6 @@ public class RecursoNoEncontradoException extends RuntimeException {
     }
 
     public RecursoNoEncontradoException(String recurso, Long id) {
-        super("No se encontro " + recurso + " con id " + id);
+        super("No se encontró " + recurso + " con id " + id);
     }
 }

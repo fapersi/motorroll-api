@@ -1,5 +1,6 @@
 package com.motorroll.motorroll_api.dto.turno;
 
+import com.motorroll.motorroll_api.dto.notificacion.NotificacionResponse;
 import com.motorroll.motorroll_api.model.EstadoTurno;
 import com.motorroll.motorroll_api.model.TipoVehiculo;
 import lombok.AllArgsConstructor;
@@ -23,5 +24,7 @@ public class TurnoResponse {
     private TipoVehiculo vehiculo;
     private String modeloVehiculo;
     private String comentario;
+    private boolean cotizarVtv;
     private EstadoTurno estado;
+    private NotificacionResponse notificacion;
 }

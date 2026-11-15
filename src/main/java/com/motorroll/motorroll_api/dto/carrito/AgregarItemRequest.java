@@ -10,10 +10,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AgregarItemRequest {
-    @NotNull(message = "Tenes que indicar el producto")
+    @NotNull(message = "Tenés que indicar el producto")
     private Long productoId;
 
-    @NotNull(message = "Tenes que indicar la cantidad")
-    @Min(value = 1, message = "La cantidad minima es 1")
+    @NotNull(message = "Tenés que indicar la cantidad")
+    @Min(value = 1, message = "La cantidad mínima es 1")
     private Integer cantidad;
 }

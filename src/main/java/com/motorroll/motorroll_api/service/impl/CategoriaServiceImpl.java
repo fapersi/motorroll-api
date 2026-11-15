@@ -38,7 +38,7 @@ public class CategoriaServiceImpl implements CategoriaService {
     @Transactional
     public CategoriaResponse crear(CategoriaRequest request) {
         if (categoriaRepository.existsByNombreIgnoreCase(request.getNombre())) {
-            throw new RecursoDuplicadoException("La categoria que intentas agregar ya existe: " + request.getNombre());
+            throw new RecursoDuplicadoException("La categoría que intentás agregar ya existe: " + request.getNombre());
         }
 
         Categoria categoria = Categoria.builder()
@@ -57,7 +57,7 @@ public class CategoriaServiceImpl implements CategoriaService {
 
         boolean cambioElNombre = !categoria.getNombre().equalsIgnoreCase(request.getNombre());
         if (cambioElNombre && categoriaRepository.existsByNombreIgnoreCase(request.getNombre())) {
-            throw new RecursoDuplicadoException("Ya existe otra categoria llamada " + request.getNombre());
+            throw new RecursoDuplicadoException("Ya existe otra categoría llamada " + request.getNombre());
         }
 
         categoria.setNombre(request.getNombre());
@@ -73,10 +73,10 @@ public class CategoriaServiceImpl implements CategoriaService {
         Categoria categoria = buscarEntidad(id);
 
         if (!categoria.getProductos().isEmpty()) {
-            throw new ReglaDeNegocioException("No se puede eliminar la categoria porque tiene productos publicados");
+            throw new ReglaDeNegocioException("No se puede eliminar la categoría porque tiene productos publicados");
         }
         if (categoriaRepository.countByCategoriaPadreId(id) > 0) {
-            throw new ReglaDeNegocioException("No se puede eliminar la categoria porque tiene subcategorias");
+            throw new ReglaDeNegocioException("No se puede eliminar la categoría porque tiene subcategorías");
         }
 
         categoriaRepository.delete(categoria);
@@ -87,13 +87,20 @@ public class CategoriaServiceImpl implements CategoriaService {
             return null;
         }
         if (categoriaPadreId.equals(idQueSeEdita)) {
-            throw new ReglaDeNegocioException("Una categoria no puede ser su propia categoria padre");
+            throw new ReglaDeNegocioException("Una categoría no puede ser su propia categoría padre");
         }
-        return buscarEntidad(categoriaPadreId);
+        if (idQueSeEdita != null && categoriaRepository.countByCategoriaPadreId(idQueSeEdita) > 0) {
+            throw new ReglaDeNegocioException("Esta categoría tiene subcategorías: no puede ir dentro de otra");
+        }
+        Categoria padre = buscarEntidad(categoriaPadreId);
+        if (padre.getCategoriaPadre() != null) {
+            throw new ReglaDeNegocioException("Elegí una categoría principal como padre: hay solo dos niveles");
+        }
+        return padre;
     }
 
     private Categoria buscarEntidad(Long id) {
         return categoriaRepository.findById(id)
-                .orElseThrow(() -> new RecursoNoEncontradoException("la categoria", id));
+                .orElseThrow(() -> new RecursoNoEncontradoException("la categoría", id));
     }
 }

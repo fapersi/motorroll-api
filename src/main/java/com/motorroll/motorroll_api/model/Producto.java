@@ -2,6 +2,7 @@ package com.motorroll.motorroll_api.model;
 
 import com.motorroll.motorroll_api.exception.ReglaDeNegocioException;
 import jakarta.persistence.*;
+import org.hibernate.annotations.OptimisticLock;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,6 +39,10 @@ public class Producto {
     @Column(nullable = false)
     private Integer stock;
 
+    @Version
+    @Column(columnDefinition = "bigint default 0 not null")
+    private Long version;
+
     @Column(length = 80)
     private String marca;
 
@@ -65,6 +70,7 @@ public class Producto {
     private Usuario vendedor;
 
     @Builder.Default
+    @OptimisticLock(excluded = true)
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ImagenProducto> imagenes = new ArrayList<>();
 
@@ -72,6 +78,7 @@ public class Producto {
     private FichaTecnica fichaTecnica;
 
     @Builder.Default
+    @OptimisticLock(excluded = true)
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Resena> resenas = new ArrayList<>();
 

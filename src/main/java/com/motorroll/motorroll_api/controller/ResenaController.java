@@ -22,8 +22,10 @@ public class ResenaController {
     private final ResenaService resenaService;
 
     @GetMapping
-    public ResponseEntity<ResenasDelProductoResponse> listar(@PathVariable Long productoId) {
-        return ResponseEntity.ok(resenaService.listar(productoId));
+    public ResponseEntity<ResenasDelProductoResponse> listar(Authentication authentication,
+                                                             @PathVariable Long productoId) {
+        String username = authentication == null ? null : authentication.getName();
+        return ResponseEntity.ok(resenaService.listar(productoId, username));
     }
 
     @PostMapping

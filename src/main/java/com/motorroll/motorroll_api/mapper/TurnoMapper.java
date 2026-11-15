@@ -40,6 +40,7 @@ public class TurnoMapper {
                 .vehiculo(turno.getVehiculo())
                 .modeloVehiculo(turno.getModeloVehiculo())
                 .comentario(turno.getComentario())
+                .cotizarVtv(turno.isCotizarVtv())
                 .estado(turno.getEstado())
                 .build();
     }

@@ -15,4 +15,5 @@ public class AgendaResponse {
     private List<String> horarios;
     private int diasDeAnticipacion;
     private List<HorarioOcupadoResponse> ocupados;
+    private List<String> feriados;
 }
