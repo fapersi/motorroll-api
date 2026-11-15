@@ -1,6 +1,6 @@
 # Motorroll – Front
 
-Front de Motorroll (TPO Aplicaciones Interactivas, UADE, 2° cuatrimestre 2026). React + Vite, en JavaScript.
+Front de Motorroll (TPO Aplicaciones Interactivas, UADE, 2.º cuatrimestre 2026). React 19 + Vite + Redux Toolkit + axios, en JavaScript.
 
 ## Cómo levantarlo
 
@@ -13,46 +13,55 @@ Usuarios de prueba: `taller.vtv` / `comprador1234`, `motorroll` / `vendedor1234`
 
 | Carpeta | Qué hay |
 | --- | --- |
+| `src/redux/` | `store.js` y un slice por servicio del back |
 | `src/views/` | Una vista por URL |
-| `src/components/` | Componentes comunes (`Aviso`, `Modal`, `Cargando`, `SoloRol`, `Campo`); en `layout/` la navbar, el footer y la portada; y una subcarpeta por parte: `usuarios/` y `admin/` (Fátima), `catalogo/` y `vendedor/` (Thiago), `carrito/` y `ordenes/` (Tomás) |
+| `src/components/` | Componentes comunes (`Aviso`, `Modal`, `Cargando`, `SoloRol`, `Campo`, `Icono`) y una subcarpeta por tema |
 | `src/routes/` | `Rutas` (todas las rutas) y `RutaPrivada` |
-| `src/services/` | Las llamadas al back de cada parte (`usuariosService`, `categoriasService`, `catalogoService`, `carritoService`) |
-| `src/utils/` | `api.js` (`pedir`, `URL_BASE`, `urlImagen`), `sesion.js` (token y usuario en localStorage) y `formato.js` (`formatearPrecio`, `formatearFecha`) |
+| `src/hooks/` | `useLimpiarAlSalir` (borra el error de un slice al salir de la pantalla) |
+| `src/utils/` | `api.js` (axios con el token y los errores), `sesion.js` (token en localStorage), `formato.js`, `fechas.js`, `numeros.js`, `puntos.js` y otros cálculos |
 | `src/assets/` | Logo, banner y fotos fijas |
 
-## Quién hace cada vista
+## Redux: los slices y quién explica cada uno
 
-| Vista | Ruta | Dueño |
-| --- | --- | --- |
-| `CatalogoView`, `DetalleView`, `PanelVendedorView` | `/`, `/producto/:id`, `/vendedor` | Thiago |
-| `LoginView`, `RegistroView`, `PerfilView`, `AdminView` | `/login`, `/registro`, `/perfil`, `/admin` | Fátima |
-| `CarritoView`, `CheckoutView`, `OrdenesView` | `/carrito`, `/checkout`, `/ordenes` | Tomás |
-| `NosotrosView`, `SinPermisoView`, `NoEncontradoView`, navbar, menú para celular, rutas, sesión | `/nosotros`, `/sin-permiso`, `*` | Melinda |
+| Slice | Estado global | Acciones principales | Lo explica |
+| --- | --- | --- | --- |
+| `usuarioSlice` | `usuario` | `login`, `registrar`, `fetchPerfil`, `updatePerfil`, `fetchUsuarios`, `updateRol`, `updateEstado`, `deleteUsuario` | Fátima |
+| `categoriaSlice` | `categorias` | `fetchCategorias`, `createCategoria`, `updateCategoria`, `deleteCategoria` | Fátima |
+| `productoSlice` | `productos` | `fetchProductos`, `fetchProductoPorId`, `fetchMisProductos`, `createProducto`, `updateProducto`, `updateStock`, `updateDescuento`, `addFoto`, `deleteProducto` | Thiago |
+| `resenaSlice` | `resenas` | `fetchResenas`, `createResena` | Thiago |
+| `ordenSlice` | `ordenes` | `fetchOrdenes` | Thiago |
+| `tiendaSlice` | `tiendas` | `fetchTiendas`, `fetchTienda`, `fetchMiTienda`, `updateMiTienda`, `updateLogo` | Thiago |
+| `carritoSlice` | `carrito` | `fetchCarrito`, `addItem`, `updateCantidad`, `removeItem`, `clearCarrito`, `checkout` | Meli |
+| `turnoSlice` | `turnos` | `fetchBancos`, `fetchAgenda`, `fetchMisTurnos`, `createTurno`, `cancelTurno` | Meli |
+| `notificacionSlice` | `notificaciones` | `fetchNotificaciones`, `marcarLeida`, `marcarTodasLeidas` | Meli |
+| `temaSlice` | `tema` | `cambiarTema` (síncrona) | Meli |
+
+Todos saben todos: la columna dice quién lo explica si la profe pregunta "¿qué hiciste vos en los slices?".
+
+## Cómo está armado Redux
+
+- **Acciones asincrónicas:** `createAsyncThunk` con axios, siempre con la misma forma: `const { data } = await api.get(...)` y `return data`.
+- **Tres estados:** cada acción tiene su `pending`, `fulfilled` y `rejected` en `extraReducers`. El error se toma de `action.error.message`; el interceptor de `api.js` ya le puso el mensaje del back.
+- **Sin GET después de cambiar algo:** después de un POST, PUT, PATCH o DELETE, el reducer actualiza el estado con la respuesta (spread para agregar, `findIndex` para editar, `filter` para borrar). Cuando el back crea un aviso, lo devuelve dentro de la misma respuesta (la orden o el turno) y `notificacionSlice` lo suma a la lista.
+- **Cada dato se pide una vez:** las listas arrancan en `null` ("todavía no hay valor") o con `cargado: false`, y el componente pide solo si todavía no están.
+- **Una acción, varios slices:** `checkout.fulfilled` vacía el carrito, suma la orden, descuenta el stock, agrega el aviso y actualiza los puntos, sin pedir nada.
+- **Los componentes solo despachan:** ninguno llama al back. Leen con `useSelector` y despachan con `useDispatch`.
 
 ## Cómo se usa lo común
 
-- **Llamar al back:** `pedir(ruta, { method, body })` devuelve una promesa con los datos y agrega el token solo. `body` puede ser un objeto (viaja como JSON) o un `FormData` (fotos).
-  ```js
-  pedir('/api/carrito/items', { method: 'POST', body: { productoId: 1, cantidad: 1 } })
-    .then((carrito) => setCarrito(carrito))
-    .catch((error) => setError(error.message))
-  ```
-- **Mostrar errores:** un estado `const [error, setError] = useState(null)` y en el JSX `<Aviso mensaje={error} onCerrar={() => setError(null)} />`. Si el back respondió un error, `error.message` trae su mensaje; si fue un 400 de validación, trae los mensajes de cada campo (por ejemplo "El mail no tiene un formato valido"). Para un mensaje de éxito: `<Aviso mensaje="Listo" tipo="exito" />`.
-- **Campos de formulario:** `<Campo etiqueta="Mail" name="email" value={datos.email} onChange={cambiar} error={errores.email} />` dibuja la etiqueta, el input y el error. Si el campo no es de texto se le pasa `type` (por ejemplo `type="password"`).
-- **Fotos y precios:** las fotos vienen del back como `/api/productos/3/imagenes/7/contenido`; `urlImagen(ruta)` le agrega `URL_BASE`. Los precios se muestran con `formatearPrecio(valor)` (US$ 48.500,00) y las fechas con `formatearFecha(fecha)`.
-- **La sesión vive en `App`:** el estado `usuario` está en `App` y baja por props.
-  - `LoginView`, `RegistroView` y `PerfilView` reciben `onLogin`. Después del login, del registro o de editar el perfil se llama a `onLogin(respuesta)`: las tres respuestas traen `token` + `usuario`, así que se guarda el token nuevo y la navbar se actualiza sola.
-  - `DetalleView`, `AdminView` y `SinPermisoView` reciben `usuario` (es `null` si no hay sesión).
-- **Botones según el rol:** `<SoloRol usuario={usuario} roles={['COMPRADOR']}>...</SoloRol>` muestra lo de adentro solo a esos roles. Por ejemplo, el botón "Agregar al carrito" va adentro de un `SoloRol` de COMPRADOR, así el vendedor y el admin no lo ven.
-- **Sesión que vence:** cuando pasan las 24 horas del token, `App` cierra la sesión y manda al login con `state.aviso`. El login lo muestra con `<Aviso mensaje={location.state?.aviso} tipo="info" />`.
-- **Volver a donde estaba:** `RutaPrivada` manda al login guardando la ruta en `state.desde`. Después del login: `navigate(location.state?.desde || '/')`.
-- **Confirmaciones:** `<Modal titulo onConfirmar onCancelar />`. Mientras carga: `<Cargando />`.
-- **Clases CSS comunes** (en `index.css`): `boton`, `boton-secundario`, `grilla`, `tarjeta`, `precio`, `precio-anterior`, `sin-stock`, `formulario`, `campo`, `campo-error`, `tabla`, `titulo-pagina`, `vacio`, `pestanas`, `etiqueta-descuento`.
+- **Mostrar errores:** `<Aviso mensaje={error} onCerrar={() => dispatch(limpiarError())} />`. Con `accion={{ texto, onClick }}` suma un botón, por ejemplo "Reintentar".
+- **Limpiar al salir:** `useLimpiarAlSalir(limpiarError)` borra el error del slice cuando la pantalla se desmonta, así no aparece en otra.
+- **Campos:** `<Campo etiqueta name value onChange error ayuda />`. Para precios, `inputMode="decimal"` y `normalizarDecimal` de `utils/numeros.js`, que acepta "48.500" y "1850,50".
+- **Confirmaciones:** `<Modal titulo texto textoConfirmar onConfirmar onCancelar />`. Se cierra con Escape o tocando afuera.
+- **Botones según el rol:** `<SoloRol usuario={usuario} roles={['COMPRADOR']}>...</SoloRol>`.
+- **Rutas protegidas:** `RutaPrivada` manda al login guardando `desde` y un aviso; después del login o del registro se vuelve ahí.
 
 ## Reglas del grupo
 
 - Nada de `document.`, `window.`, `alert` ni `confirm`.
+- Siempre `===` y `!==`.
+- Keys estables (el id), nunca el índice.
+- `null` para "todavía no hay valor".
+- Ningún componente con más de 70 líneas. Los slices pueden ser más largos: todas las acciones de un estado global van juntas.
 - Sin comentarios en el código.
-- Ningún componente con más de 70 líneas de JavaScript.
-- Cada pantalla pide lo que necesita una sola vez al montar (`useEffect` con `[]`, o con la dependencia que corresponda, como `[filtros]` o `[id]`); después de un POST, PUT, PATCH o DELETE se actualiza el estado con la respuesta, sin otro GET.
-- Antes de subir: `npm run lint` sin errores (marca `==`, `var`, `alert`, `confirm`, `window` y comentarios con "borrar") y `npm run build`.
+- Antes de subir: `npm run lint` sin errores y `npm run build`.
