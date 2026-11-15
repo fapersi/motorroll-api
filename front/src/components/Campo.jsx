@@ -2,7 +2,7 @@ import { bloquearSignos, bloquearSignosDecimales } from '../utils/numeros'
 
 function Campo(props) {
   const { etiqueta, name, value, onChange, error, ayuda, type = 'text', min } = props
-  const { decimales = false, inputMode } = props
+  const { decimales = false, inputMode, autoComplete } = props
   const esNumero = type === 'number'
   const bloquear = decimales ? bloquearSignosDecimales : bloquearSignos
 
@@ -12,6 +12,7 @@ function Campo(props) {
       <input
         type={type}
         inputMode={inputMode}
+        autoComplete={autoComplete}
         name={name}
         value={value}
         min={min}

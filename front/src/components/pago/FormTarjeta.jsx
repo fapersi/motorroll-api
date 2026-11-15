@@ -51,6 +51,7 @@ function FormTarjeta({ esCredito, textoBoton, procesando, onPagar }) {
           etiqueta="Código"
           name="codigo"
           type="password"
+          autoComplete="cc-csc"
           value={datos.codigo}
           onChange={cambiar}
           error={errores.codigo}
